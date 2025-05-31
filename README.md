@@ -1,4 +1,3 @@
-# FRewards
 # FRewards 🌟
 
 **FRewards** es un plugin de recompensas diarias totalmente personalizable para servidores Paper/Spigot 1.21+. Ofrece una interfaz moderna, sistema de permisos, cooldowns configurables, y compatibilidad con PlaceholderAPI.
