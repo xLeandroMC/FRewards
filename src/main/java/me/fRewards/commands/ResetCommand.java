@@ -1,0 +1,39 @@
+package me.fRewards.commands;
+
+import me.fRewards.config.RewardManager;
+import me.fRewards.main.Main;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+
+public class ResetCommand implements CommandExecutor {
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!sender.hasPermission("frewards.admin")) {
+            sender.sendMessage(Main.getInstance().getMessage("no-permission"));
+            return true;
+        }
+
+        if (args.length != 1) {
+            sender.sendMessage("§cUso correcto: /frewardsreset <jugador>");
+            return true;
+        }
+
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+
+        if (target == null || (!target.hasPlayedBefore() && !target.isOnline())) {
+            sender.sendMessage("§cJugador no válido o no ha entrado antes.");
+            return true;
+        }
+
+        for (RewardManager.Reward reward : Main.getInstance().getRewardManager().getAllRewards()) {
+            Main.getInstance().getRewardManager().resetRewardTime(target, reward.getId());
+        }
+
+        sender.sendMessage("§aSe han reiniciado las recompensas de §e" + target.getName() + "§a.");
+        return true;
+    }
+}

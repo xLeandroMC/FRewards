@@ -1,0 +1,452 @@
+material-state:
+  disponible: "CHEST_MINECART"
+  progreso: "FURNACE_MINECART"
+  noperm: "TNT_MINECART"
+
+gui:
+  title: "&#FF9000▸ &#FF4C00Baltiamc Rewards &#FF9000◂"
+  size: 45
+
+  info:
+    display-name: "♣ &#FCD05C¿Deseas más recompensas?"
+    lore:
+      - "§8Información"
+      - ""
+      - " §f¡Obtén más con un mejor rango!"
+      - " §fMejóralo en &#FCD05C&ntienda.baltiamc.net"
+      - ""
+      - "§8▲ §7¡Click para ir ahora!"
+    slot: 42
+    command: "tienda"
+    material: "writable_book"
+
+  close:
+    display-name: "§c✘ Salir ✘"
+    material: "IRON_DOOR"
+    slot: 40
+    sound: "BLOCK_CHEST_CLOSE"
+    command: "close"
+
+  back:
+    display-name: "§a« Volver"
+    material: "ARROW"
+    slot: 38
+    sound: "UI_BUTTON_CLICK"
+    command: "menu"
+
+  filler:
+    material: "GRAY_STAINED_GLASS_PANE"
+
+  available-item:
+    material: "EMERALD"
+    name: "&#7CFC00¡Disponible!"
+    lore:
+      - "§7Haz clic para reclamar"
+      - "§eRecompensa: %reward_name%"
+
+  cooldown-item:
+    material: "BARRIER"
+    name: "&#FF5555Disponible en: %time%"
+    lore:
+      - "§7Todavía no puedes reclamar"
+      - "§eRecompensa: %reward_name%"
+
+rewards:
+  user:
+    name: "&x&f&f&d&5&d&5&lU&x&f&7&d&2&d&2&lS&x&e&e&c&f&c&e&lU&x&e&6&c&c&c&b&lA&x&d&e&c&9&c&7&lR&x&d&5&c&6&c&4&lI&x&c&d&c&3&c&0&lO"
+    display-name: '&fRecompensa %reward_name% &8(&7☠&8)'
+    title: "&#00FF00¡RECOMPENSA DIARIA!"
+    subtitle: "§f¡Reclamada con éxito!"
+    sound: "ENTITY_PLAYER_LEVELUP"
+    permission: "frewards.user"
+    cooldown: 86400
+    slot: 0
+    commands:
+      - "crates key give %player% comun 2"
+    lore:
+      disponible:
+        - "&8Descripción"
+        - ""
+        - " &fAl reclamar esta recompensa"
+        - " &fobtendras increibles objetos."
+        - ""
+        - " &#00e0ff✎Información"
+        - "  &8▪ &fEstado: &aDisponible ✔"
+        - "  &8▪ &fColdown &e24 Horas. &6⌚"
+        - ""
+        - " &#03c17d☀Recompensas:"
+        - "  &8▪&7 x2 Llaves &8▪ &a&lCOMÚN"
+        - ""
+        - "&8◆¡Puedes reclamar esta recompensa!"
+      progreso:
+        - "&8Descripción"
+        - ""
+        - " &fAl reclamar esta recompensa"
+        - " &fobtendras increibles objetos."
+        - ""
+        - " &#00e0ff✎Información"
+        - "  &8▪ &fEstado: &eEn progreso"
+        - "  &8▪ &fColdown &c%cooldown_user%. &4⌚"
+        - ""
+        - " &#03c17d☀Recompensas:"
+        - "  &8▪&7 x2 Llaves &8▪ &a&lCOMÚN"
+        - ""
+        - "&8◆¡Ya la has reclamado espera!"
+      noperm:
+        - "&8Descripción"
+        - ""
+        - " &fAl reclamar esta recompensa"
+        - " &fobtendras increibles objetos."
+        - ""
+        - " &#00e0ff✎Información"
+        - "  &8▪ &fEstado: &cBloqueada ✘"
+        - "  &8▪ &fRequieres: %reward_name% ₪"
+        - "  &8▪ &fColdown &e24 Horas. &6⌚"
+        - ""
+        - " &#03c17d☀Recompensas:"
+        - "  &8▪&7 x2 Llaves &8▪ &a&lCOMÚN"
+        - ""
+        - "&8◆¡Necesitas permisos para reclamar!"
+  ros:
+    name: "&#46d603&lR&#79eb14&lO&#acff25&lS"
+    display-name: '&fRecompensa %reward_name% &8(&7☠&8)'
+    title: "&#00FF00¡RECOMPENSA DIARIA!"
+    subtitle: "§f¡Reclamada con éxito!"
+    sound: "ENTITY_PLAYER_LEVELUP"
+    permission: frewards.ros
+    cooldown: 86400
+    slot: 12
+    commands:
+      - "crates key give %player% comun 4"
+    lore:
+      disponible:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &aDisponible ✔'
+        - '  &8▪ &fColdown &e24 Horas. &6⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x4 Llaves &8▪ &a&lCOMÚN'
+        - ''
+        - '&8◆¡Puedes reclamar esta recompensa!'
+      progreso:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &eEn progreso'
+        - '  &8▪ &fColdown &c%cooldown_ros%. &4⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x4 Llaves &8▪ &a&lCOMÚN'
+        - ''
+        - '&8◆¡Ya la has reclamado espera!'
+      noperm:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &cBloqueada ✘'
+        - '  &8▪ &fRequieres: &#46d603&lR&#79eb14&lO&#acff25&lS ₪'
+        - '  &8▪ &fColdown &e24 Horas. &6⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x4 Llaves &8▪ &a&lCOMÚN'
+        - ''
+        - '&8◆¡Necesitas permisos para reclamar!'
+  hermes:
+    name: "&#d6c0bb&lH&#dec7c1&lE&#e6cdc6&lR&#efd4cc&lM&#f7dad1&lE&#ffe1d7&lS"
+    display-name: '&fRecompensa %reward_name% &8(&7☠&8)'
+    permission: frewards.hermes
+    cooldown: 86400
+    slot: 13
+    commands:
+      - "crates key give %player% comun 5"
+    lore:
+      disponible:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &aDisponible ✔'
+        - '  &8▪ &fColdown &e24 Horas. &6⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x5 Llaves &8▪ &a&lCOMÚN'
+        - ''
+        - '&8◆¡Puedes reclamar esta recompensa!'
+      progreso:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &eEn progreso'
+        - '  &8▪ &fColdown &c%cooldown_hermes%. &4⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x5 Llaves &8▪ &a&lCOMÚN'
+        - ''
+        - '&8◆¡Ya la has reclamado espera!'
+      noperm:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &cBloqueada ✘'
+        - '  &8▪ &fRequieres: %reward_name% ₪'
+        - '  &8▪ &fColdown &e24 Horas. &6⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x5 Llaves &8▪ &a&lCOMÚN'
+        - ''
+        - '&8◆¡Necesitas permisos para reclamar!'
+  venus:
+    name: "&#7c09d6&lV&#830be0&lE&#890deb&lN&#900ef5&lU&#9610ff&lS"
+    display-name: '&fRecompensa %reward_name% &8(&7☠&8)'
+    title: "&#00FF00¡RECOMPENSA DIARIA!"
+    subtitle: "§f¡Reclamada con éxito!"
+    sound: "ENTITY_PLAYER_LEVELUP"
+    permission: frewards.venus
+    cooldown: 86400
+    slot: 14
+    commands:
+      - "crates key give %player% comun 6"
+      - "crates key give %player% epica 1"
+    lore:
+      disponible:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &aDisponible ✔'
+        - '  &8▪ &fColdown &e24 Horas. &6⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x6 Llaves &8▪ &a&lCOMÚN'
+        - '  &8▪&7 x1 Llaves &8▪ &5&lÉPICA'
+        - ''
+        - '&8◆¡Puedes reclamar esta recompensa!'
+      progreso:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &eEn progreso'
+        - '  &8▪ &fColdown &c%cooldown_venus%. &4⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x6 Llaves &8▪ &a&lCOMÚN'
+        - '  &8▪&7 x1 Llaves &8▪ &5&lÉPICA'
+        - ''
+        - '&8◆¡Ya la has reclamado espera!'
+      noperm:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &cBloqueada ✘'
+        - '  &8▪ &fRequieres: %reward_name% ₪'
+        - '  &8▪ &fColdown &e24 Horas. &6⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x6 Llaves &8▪ &a&lCOMÚN'
+        - '  &8▪&7 x2 Llaves &8▪ &5&lÉPICA'
+        - ''
+        - '&8◆¡Necesitas permisos para reclamar!'
+  apolo:
+    name: "&#d6300c&lA&#e03409&lP&#eb3706&lO&#f53b03&lL&#ff3e00&lO"
+    display-name: '&fRecompensa %reward_name% &8(&7☠&8)'
+    title: "&#00FF00¡RECOMPENSA DIARIA!"
+    subtitle: "§f¡Reclamada con éxito!"
+    sound: "ENTITY_PLAYER_LEVELUP"
+    permission: frewards.apolo
+    cooldown: 86400
+    slot: 21
+    commands:
+      - "crates key give %player% comun 7"
+      - "crates key give %player% epica 3"
+    lore:
+      disponible:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &aDisponible ✔'
+        - '  &8▪ &fColdown &e24 Horas. &6⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x7 Llaves &8▪ &a&lCOMÚN'
+        - '  &8▪&7 x3 Llaves &8▪ &5&lÉPICA'
+        - ''
+        - '&8◆¡Puedes reclamar esta recompensa!'
+      progreso:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &eEn progreso'
+        - '  &8▪ &fColdown &c%cooldown_apolo%. &4⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x7 Llaves &8▪ &a&lCOMÚN'
+        - '  &8▪&7 x3 Llaves &8▪ &5&lÉPICA'
+        - ''
+        - '&8◆¡Ya la has reclamado espera!'
+      noperm:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &cBloqueada ✘'
+        - '  &8▪ &fRequieres: %reward_name% ₪'
+        - '  &8▪ &fColdown &e24 Horas. &6⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x7 Llaves &8▪ &a&lCOMÚN'
+        - '  &8▪&7 x3 Llaves &8▪ &5&lÉPICA'
+        - ''
+        - '&8◆¡Necesitas permisos para reclamar!'
+  ares:
+    name: "&#8ad69f&lA&#96e4b9&lR&#a2f1d2&lE&#aeffec&lS"
+    display-name: '&fRecompensa %reward_name% &8(&7☠&8)'
+    title: "&#00FF00¡RECOMPENSA DIARIA!"
+    subtitle: "§f¡Reclamada con éxito!"
+    sound: "ENTITY_PLAYER_LEVELUP"
+    permission: frewards.ares
+    cooldown: 86400
+    slot: 22
+    commands:
+      - "crates key give %player% rara 3"
+      - "crates key give %player% op 2"
+    lore:
+      disponible:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &aDisponible ✔'
+        - '  &8▪ &fColdown &e24 Horas. &6⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x3 Llaves &8▪ &b&lRARA'
+        - '  &8▪&7 x2 Llaves &8▪ &e&lOP'
+        - ''
+        - '&8◆¡Puedes reclamar esta recompensa!'
+      progreso:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &eEn progreso'
+        - '  &8▪ &fColdown &c%cooldown_ares%. &4⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x3 Llaves &8▪ &b&lRARA'
+        - '  &8▪&7 x2 Llaves &8▪ &e&lOP'
+        - ''
+        - '&8◆¡Ya la has reclamado espera!'
+      noperm:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &cBloqueada ✘'
+        - '  &8▪ &fRequieres: %reward_name% ₪'
+        - '  &8▪ &fColdown &e24 Horas. &6⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x3 Llaves &8▪ &b&lRARA'
+        - '  &8▪&7 x2 Llaves &8▪ &e&lOP'
+        - ''
+        - '&8◆¡Necesitas permisos para reclamar!'
+  baltia:
+    name: "&#ffa900&lB&#ffa000&lA&#ff9700&lL&#ff8d01&lT&#ff8401&lI&#ff7b01&lA"
+    display-name: '&fRecompensa %reward_name% &8(&7☠&8)'
+    title: "&#00FF00¡RECOMPENSA DIARIA!"
+    subtitle: "§f¡Reclamada con éxito!"
+    sound: "ENTITY_PLAYER_LEVELUP"
+    permission: frewards.baltia
+    cooldown: 86400
+    slot: 23
+    commands:
+      - "crates key give %player% rara 5"
+      - "crates key give %player% op 4"
+    lore:
+      disponible:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &aDisponible ✔'
+        - '  &8▪ &fColdown &e24 Horas. &6⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x5 Llaves &8▪ &b&lRARA'
+        - '  &8▪&7 x4 Llaves &8▪ &e&lOP'
+        - ''
+        - '&8◆¡Puedes reclamar esta recompensa!'
+      progreso:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &eEn progreso'
+        - '  &8▪ &fColdown &c%cooldown_baltia%. &4⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x5 Llaves &8▪ &b&lRARA'
+        - '  &8▪&7 x4 Llaves &8▪ &e&lOP'
+        - ''
+        - '&8◆¡Ya la has reclamado espera!'
+      noperm:
+        - '&8Descripción'
+        - ''
+        - ' &fAl reclamar esta recompensa'
+        - ' &fobtendras increibles objetos.'
+        - ''
+        - ' &#00e0ff✎Información'
+        - '  &8▪ &fEstado: &cBloqueada ✘'
+        - '  &8▪ &fRequieres: %reward_name% ₪'
+        - '  &8▪ &fColdown &e24 Horas. &6⌚'
+        - ''
+        - ' &#03c17d☀Recompensas:'
+        - '  &8▪&7 x5 Llaves &8▪ &b&lRARA'
+        - '  &8▪&7 x4 Llaves &8▪ &e&lOP'
+        - ''
+        - '&8◆¡Necesitas permisos para reclamar!'

@@ -1,0 +1,17 @@
+me\fRewards\commands\EditorCommand.class
+me\fRewards\config\RewardManager.class
+me\fRewards\main\Main$JoinNotifier.class
+me\fRewards\commands\ReloadCommand.class
+me\fRewards\utils\TimeUtil.class
+me\fRewards\config\RewardManager$Reward.class
+me\fRewards\config\RewardManager$1.class
+me\fRewards\utils\HexUtil.class
+me\fRewards\gui\EditorCommandSession.class
+me\fRewards\gui\EditorInputListener$EditMode.class
+me\fRewards\commands\ResetCommand.class
+me\fRewards\gui\EditorGUI.class
+me\fRewards\placeholders\FRewardsPlaceholder.class
+me\fRewards\gui\RewardsGUI$1.class
+me\fRewards\gui\EditorInputListener.class
+me\fRewards\main\Main.class
+me\fRewards\gui\RewardsGUI.class
