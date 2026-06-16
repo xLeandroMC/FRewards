@@ -1,1 +1,13 @@
 prefix: "&#FCD05C&lR&#FCD05C&lE&#FCD05C&lC&#FCD05C&lO&#FCD05C&lM&#FCD05C&lP&#FCD05C&lE&#FCD05C&lN&#FCD05C&lS&#FCD05C&lA&#FCD05C&lS &7›› "  # Puedes usar hex colores con HexUtil
+
+# ─────────────────────────────────────────────────────────────────────
+#  LICENCIA
+#  Obtén tu clave en: https://discord.gg/rMf96zMz
+# ─────────────────────────────────────────────────────────────────────
+license:
+  key: "FREWARDS-WK9L-B8ON-USPB-J416"
+  # Si el plugin no puede obtener tu IP pública automáticamente,
+  # escríbela aquí (solo IPv4):
+  server-ip: ""
+  # Activa logs extra del sistema de licencias (solo para debug):
+  debug: false

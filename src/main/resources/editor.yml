@@ -1,0 +1,275 @@
+# ─────────────────────────────────────────────────────────────────
+#  FRewards — editor.yml
+#  Configura todos los menus del editor de recompensas.
+#  Soporta codigos & y colores hex &#RRGGBB
+#
+#  Placeholders disponibles por seccion:
+#   selector.reward-item  → %reward_id%, %cooldown%, %items%, %commands%
+#   main.preview-lore     → %reward_id%, %cooldown%, %permission%, %commands%, %items%
+#   main.buttons.items    → %items%
+#   main.buttons.commands → %commands%
+#   main.buttons.cooldown → %cooldown%
+#   main.buttons.name     → %display_name%
+#   commands.command-item → %number%, %command%
+#   cooldown.preset-lore  → %time%
+#   cooldown.buttons.custom.lore → %cooldown%
+# ─────────────────────────────────────────────────────────────────
+
+# ══ SELECTOR DE RECOMPENSAS ═══════════════════════════════════════
+selector:
+  title: "&#FF9000▸ &#FF4C00Editor de Recompensas &#FF9000◂"
+  filler: "GRAY_STAINED_GLASS_PANE"
+  separator: "BLACK_STAINED_GLASS_PANE"
+
+  close:
+    material: "IRON_DOOR"
+    name: "&c✘ Cerrar ✘"
+    lore:
+      - "&8Cierra el editor de recompensas."
+
+  reward-item:
+    lore:
+      - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+      - " &#00e0ff✎ &fInformacion"
+      - "  &8▪ &fID: &e%reward_id%"
+      - "  &8▪ &fCooldown: &6⌚ %cooldown%"
+      - "  &8▪ &fItems: &a%items%"
+      - "  &8▪ &fComandos: &a%commands%"
+      - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+      - "&8◆ &e▶ &fClick para editar"
+
+# ══ EDITOR PRINCIPAL ══════════════════════════════════════════════
+main:
+  title-prefix: "&#FF9000▸ &#FF4C00Editor §8» &#FF9000"
+  filler: "GRAY_STAINED_GLASS_PANE"
+
+  slots:
+    items: 10
+    commands: 12
+    cooldown: 14
+    name: 16
+    preview: 22
+    back: 36
+    delete: 44
+
+  preview-lore:
+    - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+    - " &#00e0ff✎ &fInformacion"
+    - "  &8▪ &fID: &e%reward_id%"
+    - "  &8▪ &fCooldown: &6⌚ %cooldown%"
+    - "  &8▪ &fPermiso: &e%permission%"
+    - "  &8▪ &fComandos: &a%commands%"
+    - "  &8▪ &fItems: &a%items%"
+    - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+
+  name-prompt: "&#FCD05C&l✎ Nombre §r&7— Escribe el nuevo nombre a mostrar en el menu:"
+
+  buttons:
+    items:
+      material: "CHEST"
+      name: "&#03c17d☀ &fEditar Items"
+      lore:
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - " &fArrastra items al area para"
+        - " &fque se entreguen al reclamar."
+        - ""
+        - "  &8▪ &fItems actuales: &a%items%"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&8◆ &e▶ &fClick para abrir"
+
+    commands:
+      material: "PAPER"
+      name: "&#FCD05C✎ &fEditar Comandos"
+      lore:
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - " &fGestiona los comandos que se"
+        - " &fejecutan al reclamar."
+        - ""
+        - "  &8▪ &fComandos: &a%commands%"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&8◆ &e▶ &fClick para abrir"
+
+    cooldown:
+      material: "CLOCK"
+      name: "&#00e0ff⌚ &fEditar Cooldown"
+      lore:
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - " &fSelecciona el tiempo de espera"
+        - " &fentre reclamaciones."
+        - ""
+        - "  &8▪ &fActual: %cooldown%"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&8◆ &e▶ &fClick para abrir"
+
+    name:
+      material: "NAME_TAG"
+      name: "&#FCD05C♣ &fEditar Nombre"
+      lore:
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - " &fCambia el nombre visible"
+        - " &fde la recompensa en el menu."
+        - ""
+        - "  &8▪ &fActual: %display_name%"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&8◆ &e▶ &fClick para editar"
+
+    back:
+      material: "ARROW"
+      name: "&c« &fVolver al Selector"
+      lore:
+        - "&8Regresa a la lista de recompensas."
+
+    delete:
+      material: "BARRIER"
+      name: "&4⛔ &cEliminar Recompensa"
+      lore:
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - " &fElimina esta recompensa del"
+        - " &farchivo de configuracion."
+        - ""
+        - "  &8▪ &4⚠ &c¡Accion irreversible!"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&c&nShift+Click &cpara confirmar"
+
+# ══ EDITOR DE ITEMS ═══════════════════════════════════════════════
+items:
+  title-prefix: "&#FF9000▸ &#FF4C00Items §8» &#FF9000"
+
+  buttons:
+    back:
+      material: "ARROW"
+      name: "&c« &fVolver al Editor"
+      lore:
+        - "&8Guarda y vuelve al editor principal."
+
+    clear:
+      material: "BARRIER"
+      name: "&c✘ &fLimpiar Items"
+      lore:
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - " &fElimina todos los items"
+        - " &fde esta recompensa."
+        - ""
+        - "  &8▪ &4⚠ &c¡Accion irreversible!"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&c▶ &fClick para limpiar"
+
+    save:
+      material: "LIME_WOOL"
+      name: "&#03c17d✔ &fGuardar y Cerrar"
+      lore:
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - " &fGuarda los items actuales"
+        - " &fen la configuracion."
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&8◆ &e▶ &fClick para guardar"
+
+# ══ EDITOR DE COMANDOS ════════════════════════════════════════════
+commands:
+  title-prefix: "&#FF9000▸ &#FF4C00Comandos §8» &#FF9000"
+  add-prompt: "&#FCD05C&l✎ Comando §r&7— Escribe el comando &8(sin &f/&8):"
+
+  command-item:
+    material: "PAPER"
+    name: "&#FCD05C✎ &f%number%. &e%command%"
+    lore:
+      - " &8▪ &fComando &8#&e%number%"
+      - ""
+      - " &c▶ &fClick para eliminar"
+
+  buttons:
+    back:
+      material: "ARROW"
+      name: "&c« &fVolver al Editor"
+      lore:
+        - "&8Volver al editor principal."
+
+    add:
+      material: "LIME_CONCRETE"
+      name: "&#03c17d✔ &fAgregar Comando"
+      lore:
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - " &fEscribe el comando a agregar."
+        - " &fPlaceholders disponibles:"
+        - "  &8▪ &e%player% &8- &fNombre del jugador"
+        - "  &8▪ &e%reward_id% &8- &fID de la recompensa"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&8◆ &e▶ &fClick para agregar"
+
+    clear:
+      material: "BARRIER"
+      name: "&c✘ &fLimpiar Comandos"
+      lore:
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - " &fElimina todos los comandos"
+        - " &fde esta recompensa."
+        - ""
+        - "  &8▪ &4⚠ &c¡Accion irreversible!"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&c▶ &fClick para limpiar"
+
+# ══ SELECTOR DE COOLDOWN ══════════════════════════════════════════
+cooldown:
+  title-prefix: "&#FF9000▸ &#FF4C00Cooldown §8» &#FF9000"
+  custom-prompt: "&#FCD05C&l⌚ Cooldown §r&7— Escribe los segundos &8(ej: &e86400 &8= 24h, &e-1 &8= una vez)&7:"
+
+  preset-name: "&#FF9000⌚ &f%name%"
+  preset-lore:
+    - " &#00e0ff✎ &fInformacion"
+    - "  &8▪ &fTiempo: %time%"
+    - ""
+    - " &8◆ &e▶ &fClick para aplicar"
+
+  presets:
+    - slot: 10
+      seconds: 3600
+      name: "1 hora"
+      material: "RED_CONCRETE"
+    - slot: 11
+      seconds: 21600
+      name: "6 horas"
+      material: "ORANGE_CONCRETE"
+    - slot: 12
+      seconds: 43200
+      name: "12 horas"
+      material: "YELLOW_CONCRETE"
+    - slot: 13
+      seconds: 86400
+      name: "24 horas"
+      material: "LIME_CONCRETE"
+    - slot: 14
+      seconds: 172800
+      name: "48 horas"
+      material: "CYAN_CONCRETE"
+    - slot: 15
+      seconds: 604800
+      name: "7 dias"
+      material: "BLUE_CONCRETE"
+    - slot: 16
+      seconds: 2592000
+      name: "30 dias"
+      material: "PURPLE_CONCRETE"
+    - slot: 17
+      seconds: -1
+      name: "Una vez (sin repeticion)"
+      material: "PINK_CONCRETE"
+
+  buttons:
+    back:
+      material: "ARROW"
+      name: "&c« &fVolver al Editor"
+      lore:
+        - "&8Volver al editor principal."
+
+    custom:
+      material: "CLOCK"
+      name: "&#FCD05C♣ &fPersonalizado"
+      lore:
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - " &fEscribe el cooldown en segundos."
+        - ""
+        - "  &8▪ &fActual: &6⌚ %cooldown%"
+        - "  &8▪ &fEj: &e86400 &f= 24h"
+        - "  &8▪ &fEj: &e-1 &f= una sola vez"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&8◆ &e▶ &fClick para escribir"

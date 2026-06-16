@@ -1,12 +1,12 @@
 name: FRewards
-version: 1.0
+version: 2.0
 main: me.fRewards.main.Main
 api-version: 1.21
 authors:
   - xLeandroMC
 description: |
   Plugin de recompensas diarias totalmente personalizable.
-  Compatible con PlaceholderAPI, colores HEX, sonidos y múltiples tipos de recompensas.
+  Compatible con PlaceholderAPI, colores HEX, editor GUI completo y múltiples tipos de recompensas.
 
 softdepend:
   - PlaceholderAPI
@@ -14,7 +14,7 @@ softdepend:
 commands:
   frewards:
     description: Abre el menú de recompensas y comandos relacionados.
-    usage: /frewards [help]
+    usage: /frewards [help|editor|reload|reset]
     aliases: [recompensas, rewards]
     permission: frewards.use
 
@@ -32,6 +32,10 @@ permissions:
   frewards.use:
     description: Permite abrir el menú de recompensas.
     default: true
+
+  frewards.editor:
+    description: Permite abrir el editor de recompensas.
+    default: op
 
   frewards.reload:
     description: Permite recargar el plugin.

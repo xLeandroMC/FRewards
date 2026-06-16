@@ -15,11 +15,9 @@ public class ReloadCommand implements CommandExecutor {
         }
 
         // Recargar todos los archivos y sistemas
-        Main.getInstance().reloadConfig();               // config.yml
-        Main.getInstance().reloadMessages();             // messages.yml
-        Main.getInstance().reloadRewardsGuiConfig();     // rewardsgui.yml (si es usado)
-        Main.getInstance().reloadData();                 // data.yml (si es usado)
-        Main.getInstance().getRewardManager().reload();  // recompensas
+        Main.getInstance().getRewardManager().reload();
+        Main.getInstance().reloadMessages();
+        Main.getInstance().reloadEditorConfig();
 
         sender.sendMessage(Main.getInstance().getMessage("reload-success"));
         return true;

@@ -5,104 +5,108 @@ import me.fRewards.config.RewardManager.Reward;
 import me.fRewards.main.Main;
 import me.fRewards.utils.HexUtil;
 import me.fRewards.utils.TimeUtil;
-import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class RewardsGUI implements Listener {
 
-    private static final FileConfiguration config = Main.getInstance().getRewardsGuiConfig();
-    private static final String TITLE = HexUtil.format(config.getString("gui.title", "§7▸ §6Recompensas §7◂"));
+    // Tarea de actualización activa por jugador (para cancelarla al cerrar)
+    private static final Map<UUID, BukkitTask> activeTasks = new HashMap<>();
 
-    public static void open(Player player) {
-        int size = config.getInt("gui.size", 45);
-        Inventory inv = Bukkit.createInventory(player, size, TITLE);
-
-        RewardManager rewardManager = Main.getInstance().getRewardManager();
-
-        for (Reward reward : rewardManager.getAllRewards()) {
-            boolean hasPerm = player.hasPermission(reward.getPermission());
-            boolean available = rewardManager.canClaim(player, reward.getId());
-            ItemStack item = getDisplayItem(player, reward, hasPerm, available);
-            inv.setItem(reward.getSlot(), item);
-        }
-
-        addStaticButtons(inv, player, size);
-
-        player.openInventory(inv);
-
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!player.getOpenInventory().getTitle().equals(TITLE)) {
-                    cancel();
-                    return;
-                }
-                for (Reward reward : rewardManager.getAllRewards()) {
-                    boolean hasPerm = player.hasPermission(reward.getPermission());
-                    boolean available = rewardManager.canClaim(player, reward.getId());
-                    ItemStack updatedItem = getDisplayItem(player, reward, hasPerm, available);
-                    inv.setItem(reward.getSlot(), updatedItem);
-                }
-            }
-        }.runTaskTimer(Main.getInstance(), 20L, 20L);
+    private static Component titleComponent() {
+        return HexUtil.comp(Main.getInstance().getRewardsGuiConfig().getString("gui.title", "§6Recompensas"));
     }
 
-    private static void addStaticButtons(Inventory inv, Player player, int size) {
+    public static void open(Player player) {
+        FileConfiguration config = Main.getInstance().getRewardsGuiConfig();
+        Component title = titleComponent();
+        int size = config.getInt("gui.size", 45);
+
+        Inventory inv = Bukkit.createInventory(null, size, title);
+        fillRewards(inv, player);
+        fillStaticButtons(inv, player, config, size);
+        player.openInventory(inv);
+
+        // Cancelar tarea previa si el jugador reabre el GUI
+        BukkitTask old = activeTasks.remove(player.getUniqueId());
+        if (old != null) old.cancel();
+
+        // Actualizar los cooldowns cada segundo
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(Main.getInstance(), () -> {
+            if (!player.isOnline()) {
+                BukkitTask self = activeTasks.remove(player.getUniqueId());
+                if (self != null) self.cancel();
+                return;
+            }
+            Component openTitle = player.getOpenInventory().title();
+            if (!title.equals(openTitle)) {
+                BukkitTask self = activeTasks.remove(player.getUniqueId());
+                if (self != null) self.cancel();
+                return;
+            }
+            fillRewards(inv, player);
+        }, 20L, 20L);
+
+        activeTasks.put(player.getUniqueId(), task);
+    }
+
+    // ── Construcción del inventario ───────────────────────────────────────────
+
+    private static void fillRewards(Inventory inv, Player player) {
+        RewardManager rm = Main.getInstance().getRewardManager();
+        for (Reward reward : rm.getAllRewards()) {
+            boolean hasPerm   = player.hasPermission(reward.getPermission());
+            boolean available = rm.canClaim(player, reward.getId());
+            inv.setItem(reward.getSlot(), buildRewardItem(player, reward, hasPerm, available));
+        }
+    }
+
+    private static void fillStaticButtons(Inventory inv, Player player, FileConfiguration config, int size) {
         if (config.isConfigurationSection("gui.info")) {
-            Material material = getConfiguredMaterial("gui.info.material", "BOOK");
-            ItemStack infoItem = new ItemStack(material);
-            ItemMeta meta = infoItem.getItemMeta();
-            meta.setDisplayName(HexUtil.format(PlaceholderAPI.setPlaceholders(player,
-                    config.getString("gui.info.display-name", "§a¿Deseas más recompensas?"))));
-            List<String> lore = config.getStringList("gui.info.lore");
-            List<String> coloredLore = new ArrayList<>();
-            for (String line : lore) {
-                String parsed = PlaceholderAPI.setPlaceholders(player, line);
-                coloredLore.add(HexUtil.format(parsed));
-            }
-            meta.setLore(coloredLore);
-            infoItem.setItemMeta(meta);
-            inv.setItem(config.getInt("gui.info.slot", size - 1), infoItem);
+            inv.setItem(config.getInt("gui.info.slot", size - 3),
+                buildButton(config.getString("gui.info.material", "WRITABLE_BOOK"),
+                    config.getString("gui.info.display-name", "§aInfo"),
+                    config.getStringList("gui.info.lore"), player));
         }
-
         if (config.isConfigurationSection("gui.close")) {
-            Material material = getConfiguredMaterial("gui.close.material", "BARRIER");
-            ItemStack closeItem = new ItemStack(material);
-            ItemMeta meta = closeItem.getItemMeta();
-            if (meta != null) {
-                meta.setDisplayName(HexUtil.format(config.getString("gui.close.display-name", "§cSalir")));
-                closeItem.setItemMeta(meta);
-            }
-            inv.setItem(config.getInt("gui.close.slot", size - 5), closeItem);
+            inv.setItem(config.getInt("gui.close.slot", size - 5),
+                buildButton(config.getString("gui.close.material", "IRON_DOOR"),
+                    config.getString("gui.close.display-name", "§cSalir"),
+                    Collections.emptyList(), player));
         }
-
         if (config.isConfigurationSection("gui.back")) {
-            Material material = getConfiguredMaterial("gui.back.material", "ARROW");
-            ItemStack backItem = new ItemStack(material);
-            ItemMeta meta = backItem.getItemMeta();
-            meta.setDisplayName(HexUtil.format(config.getString("gui.back.display-name", "§aVolver")));
-            backItem.setItemMeta(meta);
-            inv.setItem(config.getInt("gui.back.slot", size - 7), backItem);
+            inv.setItem(config.getInt("gui.back.slot", size - 7),
+                buildButton(config.getString("gui.back.material", "ARROW"),
+                    config.getString("gui.back.display-name", "§aVolver"),
+                    Collections.emptyList(), player));
         }
 
-        ItemStack filler = new ItemStack(Material.valueOf(config.getString("gui.filler.material", "GRAY_STAINED_GLASS_PANE")));
-        ItemMeta fillerMeta = filler.getItemMeta();
-        fillerMeta.setDisplayName(" ");
-        filler.setItemMeta(fillerMeta);
+        // Relleno de slots vacíos
+        String fillerName = config.getString("gui.filler.material", "GRAY_STAINED_GLASS_PANE");
+        Material fillerMat;
+        try { fillerMat = Material.valueOf(fillerName.toUpperCase()); }
+        catch (IllegalArgumentException e) { fillerMat = Material.GRAY_STAINED_GLASS_PANE; }
+
+        ItemStack filler = new ItemStack(fillerMat);
+        ItemMeta fm = filler.getItemMeta();
+        fm.displayName(Component.empty());
+        filler.setItemMeta(fm);
+
         for (int i = 0; i < size; i++) {
             if (inv.getItem(i) == null || inv.getItem(i).getType() == Material.AIR) {
                 inv.setItem(i, filler);
@@ -110,105 +114,137 @@ public class RewardsGUI implements Listener {
         }
     }
 
-    private static ItemStack getDisplayItem(Player player, Reward reward, boolean hasPerm, boolean available) {
+    private static ItemStack buildRewardItem(Player player, Reward reward, boolean hasPerm, boolean available) {
         String state = !hasPerm ? "noperm" : !available ? "progreso" : "disponible";
-
-        Material material;
-        try {
-            material = Material.valueOf(config.getString("material-state." + state, reward.getMaterial().name()));
-        } catch (IllegalArgumentException e) {
-            material = reward.getMaterial();
-        }
+        Material material = reward.getStateMaterial(state);
 
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        String display = reward.getDisplayName().replace("%reward_name%", reward.getName());
-        meta.setDisplayName(HexUtil.format(PlaceholderAPI.setPlaceholders(player, display)));
 
-        List<String> lore = reward.getLoreSection(state);
-        List<String> finalLore = new ArrayList<>();
-        for (String line : lore) {
+        String display = reward.getDisplayName().replace("%reward_name%", reward.getName());
+        meta.displayName(HexUtil.comp(applyPAPI(player, display)));
+
+        List<String> loreRaw = reward.getLoreSection(state);
+        List<Component> lore = loreRaw.stream().map(line -> {
             line = line.replace("%reward_name%", reward.getName());
             if (line.contains("%cooldown%")) {
-                long seconds = Main.getInstance().getRewardManager().getRemainingTime(player, reward.getId()); // ✅ ESTA ES LA BUENA
-                line = line.replace("%cooldown%", TimeUtil.formatSeconds(seconds));
+                long secs = Main.getInstance().getRewardManager().getRemainingTime(player, reward.getId());
+                line = line.replace("%cooldown%", TimeUtil.formatSeconds(secs));
             }
-            finalLore.add(HexUtil.format(PlaceholderAPI.setPlaceholders(player, line)));
-        }
+            return HexUtil.comp(applyPAPI(player, line));
+        }).collect(Collectors.toList());
 
-        meta.setLore(finalLore);
+        meta.lore(lore);
         item.setItemMeta(meta);
         return item;
     }
 
+    private static ItemStack buildButton(String materialName, String displayName, List<String> loreRaw, Player player) {
+        Material mat;
+        try { mat = Material.valueOf(materialName.toUpperCase()); }
+        catch (IllegalArgumentException e) { mat = Material.PAPER; }
+
+        ItemStack item = new ItemStack(mat);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(HexUtil.comp(applyPAPI(player, displayName)));
+        meta.lore(loreRaw.stream()
+            .map(l -> HexUtil.comp(applyPAPI(player, l)))
+            .collect(Collectors.toList()));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    // PlaceholderAPI solo si está instalado
+    private static String applyPAPI(Player player, String text) {
+        if (text == null) return "";
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            return me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, text);
+        }
+        return text;
+    }
+
+    // ── Eventos ───────────────────────────────────────────────────────────────
+
+    @EventHandler
+    public void onClose(InventoryCloseEvent event) {
+        if (!(event.getPlayer() instanceof Player player)) return;
+        if (!event.getView().title().equals(titleComponent())) return;
+        cancelTask(player);
+    }
+
+    // Seguridad defensiva: si el jugador se desconecta bruscamente
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        cancelTask(event.getPlayer());
+    }
+
+    private static void cancelTask(Player player) {
+        BukkitTask task = activeTasks.remove(player.getUniqueId());
+        if (task != null) task.cancel();
+    }
+
+    /** Cancela todas las tareas activas. Llamar desde Main.onDisable(). */
+    public static void cancelAll() {
+        activeTasks.values().forEach(BukkitTask::cancel);
+        activeTasks.clear();
+    }
+
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (!event.getView().getTitle().equals(TITLE)) return;
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (!event.getView().title().equals(titleComponent())) return;
 
         event.setCancelled(true);
-        Player player = (Player) event.getWhoClicked();
         int slot = event.getRawSlot();
-        if (slot >= event.getInventory().getSize()) return;
+        FileConfiguration config = Main.getInstance().getRewardsGuiConfig();
+        int size = config.getInt("gui.size", 45);
+        if (slot >= size) return;
 
-        RewardManager rewardManager = Main.getInstance().getRewardManager();
-        for (Reward reward : rewardManager.getAllRewards()) {
+        // Click en recompensa
+        for (Reward reward : Main.getInstance().getRewardManager().getAllRewards()) {
             if (reward.getSlot() == slot) {
-                if (!player.hasPermission(reward.getPermission())) {
-                    player.sendMessage("§cNo tienes permiso para esta recompensa.");
-                    player.closeInventory();
-                    return;
-                }
-                if (!rewardManager.canClaim(player, reward.getId())) {
-                    player.sendMessage("§cNo puedes reclamar esta recompensa todavía.");
-                    player.closeInventory();
-                    return;
-                }
-                rewardManager.claimReward(player, reward.getId());
-                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
-                player.closeInventory();
+                handleRewardClick(player, reward);
                 return;
             }
         }
 
-        int defaultSlot = config.getInt("gui.size", 45) - 1;
-        if (slot == config.getInt("gui.info.slot", defaultSlot)) {
-            player.closeInventory();
-            String command = config.getString("gui.info.command", "");
-            if (!command.isEmpty()) {
-                player.performCommand(command);
-            }
-        }
-
+        // Botones estáticos
         if (slot == config.getInt("gui.close.slot", -1)) {
-            String sound = config.getString("gui.close.sound", "");
-            if (!sound.isEmpty()) {
-                try {
-                    player.playSound(player.getLocation(), Sound.valueOf(sound), 1, 1);
-                } catch (Exception ignored) {}
-            }
+            playSound(player, config.getString("gui.close.sound", ""));
             player.closeInventory();
+            return;
         }
-
         if (slot == config.getInt("gui.back.slot", -1)) {
-            String sound = config.getString("gui.back.sound", "");
-            if (!sound.isEmpty()) {
-                try {
-                    player.playSound(player.getLocation(), Sound.valueOf(sound), 1, 1);
-                } catch (Exception ignored) {}
-            }
-            String command = config.getString("gui.back.command", "");
-            if (!command.isEmpty()) {
-                player.closeInventory();
-                player.performCommand(command);
-            }
+            playSound(player, config.getString("gui.back.sound", ""));
+            String cmd = config.getString("gui.back.command", "");
+            if (!cmd.isEmpty()) { player.closeInventory(); player.performCommand(cmd); }
+            return;
+        }
+        if (slot == config.getInt("gui.info.slot", -1)) {
+            player.closeInventory();
+            String cmd = config.getString("gui.info.command", "");
+            if (!cmd.isEmpty()) player.performCommand(cmd);
         }
     }
 
-    private static Material getConfiguredMaterial(String path, String fallback) {
-        try {
-            return Material.valueOf(config.getString(path, fallback));
-        } catch (IllegalArgumentException e) {
-            return Material.valueOf(fallback);
+    private void handleRewardClick(Player player, Reward reward) {
+        if (!player.hasPermission(reward.getPermission())) {
+            player.sendMessage(Main.getInstance().getMessage("no-permission"));
+            return;
         }
+        if (!Main.getInstance().getRewardManager().canClaim(player, reward.getId())) {
+            player.sendMessage(Main.getInstance().getMessage("reward-cooldown"));
+            return;
+        }
+        Main.getInstance().getRewardManager().claimReward(player, reward.getId());
+    }
+
+    private void playSound(Player player, String soundName) {
+        if (soundName == null || soundName.isEmpty()) return;
+        try {
+            player.playSound(net.kyori.adventure.sound.Sound.sound(
+                net.kyori.adventure.key.Key.key(soundName.toLowerCase().replace("_", ".")),
+                net.kyori.adventure.sound.Sound.Source.MASTER, 1f, 1f));
+        } catch (Exception ignored) {}
     }
 }

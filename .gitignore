@@ -1,0 +1,20 @@
+# Build output
+/target/
+/builds/
+*.jar
+dependency-reduced-pom.xml
+
+# ProGuard (el mapping permite desofuscar — NO versionar)
+proguard_map.txt
+proguard_seed.txt
+
+# IntelliJ IDEA
+/.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code (worktrees y estado local)
+/.claude/

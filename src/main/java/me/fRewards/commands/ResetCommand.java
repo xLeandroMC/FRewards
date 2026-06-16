@@ -1,6 +1,5 @@
 package me.fRewards.commands;
 
-import me.fRewards.config.RewardManager;
 import me.fRewards.main.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -17,23 +16,22 @@ public class ResetCommand implements CommandExecutor {
             return true;
         }
 
-        if (args.length != 1) {
-            sender.sendMessage("§cUso correcto: /frewardsreset <jugador>");
+        if (args.length < 1) {
+            sender.sendMessage(Main.getInstance().getMessage("no-permission")); // fallback
             return true;
         }
 
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
 
-        if (target == null || (!target.hasPlayedBefore() && !target.isOnline())) {
-            sender.sendMessage("§cJugador no válido o no ha entrado antes.");
+        if (!target.hasPlayedBefore() && !target.isOnline()) {
+            sender.sendMessage(Main.getInstance().getMessage("reset-player-not-found")
+                .replace("%player%", args[0]));
             return true;
         }
 
-        for (RewardManager.Reward reward : Main.getInstance().getRewardManager().getAllRewards()) {
-            Main.getInstance().getRewardManager().resetRewardTime(target, reward.getId());
-        }
-
-        sender.sendMessage("§aSe han reiniciado las recompensas de §e" + target.getName() + "§a.");
+        Main.getInstance().getRewardManager().resetAllRewards(target);
+        sender.sendMessage(Main.getInstance().getMessage("reset-success")
+            .replace("%player%", target.getName() != null ? target.getName() : args[0]));
         return true;
     }
 }

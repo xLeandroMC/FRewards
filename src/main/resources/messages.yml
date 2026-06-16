@@ -1,20 +1,46 @@
-no-permission: "§c⛔ No tienes permiso para hacer esto."
+# ─────────────────────────────────────────────────────────────────
+#  FRewards — messages.yml
+#  Prefijo definido en config.yml → prefix
+#  Soporta códigos & y colores hex &#RRGGBB
+# ─────────────────────────────────────────────────────────────────
 
-reward-claimed: "§a✅ ¡Has reclamado tu recompensa con éxito!"
-reward-cooldown: "§e⏳ Debes esperar %time% antes de poder reclamar esta recompensa."
-invalid-reward: "§c⚠️ Recompensa no válida o no encontrada."
+# ── General ───────────────────────────────────────────────────────
+no-permission:  "&c⛔ No tienes permiso para hacer esto."
+invalid-reward: "&c⚠ Recompensa no válida o no encontrada."
+command-unknown: "&cComando desconocido. Usa &e/frewards help &cpara ver los comandos."
 
-menu-opened: "§a🎁 Menú de recompensas abierto correctamente."
-reload-success: "§a🔄 FRewards recargado correctamente."
+# ── Recompensas ───────────────────────────────────────────────────
+reward-claimed:  "&a✅ ¡Has reclamado tu recompensa con éxito!"
+reward-cooldown: "&e⏳ Todavía no puedes reclamar esta recompensa."
 
-command-unknown: "§cComando desconocido. Usa §e/frewards help §cpara ver los comandos disponibles."
+# ── Reload ────────────────────────────────────────────────────────
+reload-success: "&a🔄 FRewards recargado correctamente."
 
-help-title: "§e§m----------§r §6FRewards Ayuda §e§m----------"
-help-1: "§e/frewards §7- Abre el menú de recompensas"
-help-2: "§e/frewardsreload §7- Recarga configuración"
-help-3: "§e/frewardscreate <id> §7- Crea una nueva recompensa"
-help-4: "§e/frewardseditor <id> §7- Edita una recompensa"
-help-5: "§e/frewards help §7- Muestra esta ayuda"
-help-footer: "§e§m----------------------------------------"
+# ── Ayuda ─────────────────────────────────────────────────────────
+help-title:  "&e&m        &r &6FRewards &e— &6Ayuda &e&m        "
+help-1:      " &e/frewards &7— Abre el menú de recompensas"
+help-2:      " &e/frewards editor &f<id> &7— Edita una recompensa"
+help-3:      " &e/frewards reload &7— Recarga la configuración"
+help-4:      " &e/frewards reset &f<jugador> &7— Reinicia cooldowns"
+help-footer: "&e&m────────────────────────────────────"
 
-join-notify: "§b✨ ¡Tienes recompensas disponibles en el spawn!"
+# ── Notificación de entrada ───────────────────────────────────────
+join-notify:
+  singular: "&f\n&fTienes &e%rewards% &frecompensa sin reclamar. &8(&e/rewards&8)\n&f"
+  plural:   "&f\n&fTienes &e%rewards% &frecompensas sin reclamar. &8(&e/rewards&8)\n&f"
+
+# ── Reset ─────────────────────────────────────────────────────────
+reset-success:          "&aSe han reiniciado las recompensas de &e%player%&a."
+reset-player-not-found: "&cJugador &f%player% &cno encontrado o nunca ha entrado."
+
+# ── Editor ────────────────────────────────────────────────────────
+editor-saved:          "&a✅ Campo &f%field% &aactualizado a: &f%value%"
+editor-cancelled:      "&7❌ Edición cancelada."
+editor-deleted:        "&a✅ Recompensa &f%id% &aeliminada correctamente."
+editor-delete-confirm: "&c⚠ Haz &lShift+Click &cpara confirmar la eliminación."
+editor-saved-items:    "&a✅ Se guardaron &f%count% &aítems."
+editor-cleared-items:  "&a✅ Ítems eliminados correctamente."
+editor-cmd-added:      "&a✅ Comando agregado: &f%cmd%"
+editor-cmd-removed:    "&a✅ Comando eliminado: &f%cmd%"
+editor-cmds-cleared:   "&a✅ Todos los comandos eliminados."
+editor-cooldown-set:   "&a✅ Cooldown establecido a: &f%time%"

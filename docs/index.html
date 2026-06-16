@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FRewards — Plugin de Recompensas | TeamKraken</title>
+  <meta name="description" content="FRewards es un plugin de Minecraft con recompensas diarias totalmente configurables, editor GUI en vivo, cooldowns por rango y soporte HEX completo." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #07070f; --bg2: #0d0d1a; --card: #11111e; --card2: #161626;
+      --border: rgba(255,255,255,.06); --border2: rgba(255,255,255,.1);
+      --gold: #FF9000; --gold2: #FF4C00; --yellow: #FCD05C;
+      --green: #22c55e; --red: #ef4444; --purple: #9333ea;
+      --text: #e2e8f0; --muted: #64748b; --radius: 14px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.6; }
+    #stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%; height: 64px;
+      background: rgba(7,7,15,.88); backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem; text-decoration: none; color: var(--text); }
+    .nav-logo .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 12px var(--gold); }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: .875rem; font-weight: 500; transition: color .2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .lang-btn { padding: 7px 16px; border-radius: 8px; background: transparent; border: 1px solid rgba(255,255,255,.18); color: var(--text); font-weight: 700; font-size: .82rem; cursor: pointer; letter-spacing: .08em; transition: border-color .2s, color .2s; }
+    .lang-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .nav-btn { padding: 8px 20px; border-radius: 8px; background: linear-gradient(135deg, var(--gold), var(--gold2)); color: #fff; font-weight: 700; font-size: .85rem; text-decoration: none; transition: opacity .2s, transform .2s; white-space: nowrap; }
+    .nav-btn:hover { opacity: .9; transform: translateY(-1px); }
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; }
+
+    /* HERO */
+    .hero { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 120px 5% 80px; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 999px; background: rgba(255,144,0,.08); border: 1px solid rgba(255,144,0,.3); font-size: .8rem; font-weight: 600; color: var(--gold); margin-bottom: 28px; }
+    .hero-badge .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,144,0,.6); } 50% { box-shadow: 0 0 0 6px rgba(255,144,0,0); } }
+    .hero h1 { font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 900; line-height: 1.05; background: linear-gradient(135deg, #fff 0%, var(--gold) 50%, var(--gold2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 24px; }
+    .hero-sub { font-size: clamp(1rem, 2vw, 1.2rem); color: var(--muted); max-width: 620px; margin: 0 auto 48px; }
+    .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .btn-primary { padding: 14px 36px; border-radius: var(--radius); background: linear-gradient(135deg, var(--gold), var(--gold2)); color: #fff; font-weight: 700; font-size: 1rem; text-decoration: none; transition: transform .2s, box-shadow .2s; box-shadow: 0 0 30px rgba(255,144,0,.3); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(255,144,0,.45); }
+    .btn-ghost { padding: 14px 36px; border-radius: var(--radius); background: transparent; border: 1px solid var(--border2); color: var(--text); font-weight: 600; font-size: 1rem; text-decoration: none; transition: border-color .2s, background .2s; }
+    .btn-ghost:hover { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.04); }
+    .hero-stats { margin-top: 72px; display: flex; gap: 56px; flex-wrap: wrap; justify-content: center; }
+    .hero-stat .val { font-size: 2rem; font-weight: 800; color: var(--gold); }
+    .hero-stat .lbl { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+
+    /* SECTIONS */
+    section { position: relative; z-index: 1; padding: 100px 5%; }
+    .section-label { font-size: .75rem; font-weight: 700; letter-spacing: .15em; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; }
+    .section-title { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; margin-bottom: 16px; }
+    .section-sub { color: var(--muted); font-size: 1rem; max-width: 560px; }
+    .section-head { margin-bottom: 60px; }
+
+    /* FEATURES */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .feature-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; transition: transform .3s, border-color .3s, box-shadow .3s; }
+    .feature-card:hover { transform: translateY(-4px); border-color: rgba(255,144,0,.2); box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+    .feature-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 20px; }
+    .feature-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; }
+    .feature-card p { font-size: .875rem; color: var(--muted); line-height: 1.65; }
+    .feature-card p code { font-family: 'JetBrains Mono', monospace; font-size: .8rem; background: rgba(255,144,0,.08); color: var(--gold); padding: 1px 5px; border-radius: 4px; }
+
+    /* REWARD STATES */
+    .states-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-bottom: 60px; }
+    .state-card { border-radius: var(--radius); padding: 28px; border: 1px solid; }
+    .state-card.available { background: rgba(34,197,94,.05); border-color: rgba(34,197,94,.2); }
+    .state-card.progress  { background: rgba(234,179, 8,.05); border-color: rgba(234,179, 8,.2); }
+    .state-card.locked    { background: rgba(239, 68,68,.05); border-color: rgba(239, 68,68,.2); }
+    .state-dot { width: 10px; height: 10px; border-radius: 50%; margin-bottom: 14px; }
+    .state-card.available .state-dot { background: var(--green); box-shadow: 0 0 10px var(--green); }
+    .state-card.progress  .state-dot { background: #eab308; box-shadow: 0 0 10px #eab308; }
+    .state-card.locked    .state-dot { background: var(--red); box-shadow: 0 0 10px var(--red); }
+    .state-card h3 { font-size: .95rem; font-weight: 700; margin-bottom: 8px; }
+    .state-card p { font-size: .82rem; color: var(--muted); line-height: 1.6; }
+
+    /* COMMANDS */
+    .tabs { display: flex; gap: 8px; margin-bottom: 36px; flex-wrap: wrap; }
+    .tab { padding: 9px 22px; border-radius: 8px; cursor: pointer; font-size: .85rem; font-weight: 600; border: 1px solid var(--border); background: transparent; color: var(--muted); transition: all .2s; }
+    .tab.active { background: linear-gradient(135deg, rgba(255,144,0,.12), rgba(255,76,0,.12)); border-color: rgba(255,144,0,.35); color: var(--gold); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .cmd-table { width: 100%; border-collapse: collapse; }
+    .cmd-table thead tr { border-bottom: 1px solid var(--border); }
+    .cmd-table th { padding: 12px 16px; text-align: left; font-size: .75rem; font-weight: 700; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
+    .cmd-table td { padding: 16px; border-bottom: 1px solid rgba(255,255,255,.04); font-size: .875rem; vertical-align: top; }
+    .cmd-table tr:last-child td { border-bottom: none; }
+    .cmd-table tr:hover td { background: rgba(255,255,255,.02); }
+    .cmd-mono { font-family: 'JetBrains Mono', monospace; font-size: .82rem; background: rgba(255,144,0,.08); border: 1px solid rgba(255,144,0,.2); color: var(--gold); padding: 4px 10px; border-radius: 6px; white-space: nowrap; }
+    .badge-op  { display: inline-block; padding: 2px 10px; border-radius: 999px; background: rgba(255,144,0,.1);  border: 1px solid rgba(255,144,0,.3);  color: var(--gold);  font-size: .72rem; font-weight: 700; }
+    .badge-all { display: inline-block; padding: 2px 10px; border-radius: 999px; background: rgba(34,197,94,.1);  border: 1px solid rgba(34,197,94,.3);  color: var(--green); font-size: .72rem; font-weight: 700; }
+    .badge-perm{ display: inline-block; padding: 2px 10px; border-radius: 999px; background: rgba(147,51,234,.1); border: 1px solid rgba(147,51,234,.3); color: #a78bfa; font-size: .72rem; font-weight: 700; }
+
+    /* PERMISSIONS */
+    .perm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px,1fr)); gap: 16px; }
+    .perm-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 26px; display: flex; flex-direction: column; gap: 8px; transition: border-color .2s, transform .2s; }
+    .perm-card:hover { border-color: rgba(255,144,0,.2); transform: translateY(-2px); }
+    .perm-node { font-family: 'JetBrains Mono', monospace; font-size: .82rem; color: var(--gold); background: rgba(255,144,0,.08); border: 1px solid rgba(255,144,0,.2); padding: 5px 12px; border-radius: 6px; align-self: flex-start; }
+    .perm-desc { font-size: .875rem; color: var(--muted); }
+    .perm-default { font-size: .75rem; font-weight: 700; align-self: flex-start; padding: 2px 10px; border-radius: 999px; }
+    .perm-default.true  { background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.3); color: var(--green); }
+    .perm-default.op    { background: rgba(255,144,0,.1); border: 1px solid rgba(255,144,0,.3); color: var(--gold); }
+    .perm-default.false { background: rgba(100,116,139,.1); border: 1px solid rgba(100,116,139,.3); color: var(--muted); }
+
+    /* PLACEHOLDERS */
+    .ph-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px,1fr)); gap: 16px; }
+    .ph-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; display: flex; flex-direction: column; gap: 10px; transition: border-color .2s, transform .2s; }
+    .ph-card:hover { border-color: rgba(147,51,234,.3); transform: translateY(-2px); }
+    .ph-name { font-family: 'JetBrains Mono', monospace; font-size: .82rem; color: #a78bfa; background: rgba(147,51,234,.1); border: 1px solid rgba(147,51,234,.2); padding: 5px 12px; border-radius: 6px; align-self: flex-start; }
+    .ph-desc { font-size: .875rem; color: var(--muted); }
+    .ph-example { font-size: .78rem; color: var(--green); font-family: 'JetBrains Mono', monospace; }
+
+    /* CODE */
+    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .code-block { background: #0a0a14; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: var(--card2); border-bottom: 1px solid var(--border); font-size: .8rem; color: var(--muted); }
+    .code-header .dots { display: flex; gap: 6px; }
+    .code-header .dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .code-body { padding: 24px; overflow-x: auto; }
+    .code-body pre { font-family: 'JetBrains Mono', monospace; font-size: .78rem; line-height: 1.75; white-space: pre; }
+    .y-k { color: #7dd3fc; } .y-v { color: #a5f3fc; } .y-s { color: #86efac; } .y-ph { color: #fde68a; } .y-c { color: #475569; }
+
+    /* STEPS */
+    .steps { display: flex; flex-direction: column; gap: 0; max-width: 760px; }
+    .step { display: flex; gap: 28px; padding: 36px 0; border-bottom: 1px solid var(--border); }
+    .step:last-child { border-bottom: none; }
+    .step-num { flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold2)); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .9rem; color: #fff; }
+    .step-body h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+    .step-body p { font-size: .875rem; color: var(--muted); line-height: 1.65; }
+    .step-body code { font-family: 'JetBrains Mono', monospace; font-size: .8rem; background: rgba(255,144,0,.08); color: var(--gold); padding: 2px 7px; border-radius: 4px; }
+
+    /* REQUIREMENTS */
+    .req-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    .req-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; display: flex; flex-direction: column; gap: 12px; }
+    .req-icon { font-size: 2rem; }
+    .req-card h3 { font-weight: 700; font-size: .95rem; }
+    .req-card p { font-size: .82rem; color: var(--muted); }
+    .req-tag { align-self: flex-start; padding: 3px 12px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+    .req-required { background: rgba(255,144,0,.1); border: 1px solid rgba(255,144,0,.3); color: var(--gold); }
+    .req-optional { background: rgba(147,51,234,.1); border: 1px solid rgba(147,51,234,.3); color: #a78bfa; }
+
+    /* BENTO / PREVIEW */
+    .bento-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+    .bento-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; cursor: zoom-in; position: relative; transition: transform .3s, border-color .3s, box-shadow .3s; }
+    .bento-card:hover { transform: translateY(-5px) scale(1.01); border-color: rgba(255,144,0,.3); box-shadow: 0 24px 70px rgba(0,0,0,.55); }
+    .bento-card.span2 { grid-column: span 2; }
+    .bento-card.span3 { grid-column: span 3; }
+    .bento-img-wrap { position: relative; overflow: hidden; }
+    .bento-img-wrap img { width: 100%; display: block; image-rendering: pixelated; transition: transform .4s; }
+    .bento-card:hover .bento-img-wrap img { transform: scale(1.04); }
+    .bento-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,.7) 100%); opacity: 0; transition: opacity .3s; }
+    .bento-card:hover .bento-overlay { opacity: 1; }
+    .bento-zoom { position: absolute; bottom: 14px; right: 14px; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,144,0,.2); border: 1px solid rgba(255,144,0,.4); display: flex; align-items: center; justify-content: center; font-size: .9rem; opacity: 0; transition: opacity .3s; }
+    .bento-card:hover .bento-zoom { opacity: 1; }
+    .bento-badge { position: absolute; top: 12px; left: 12px; padding: 4px 12px; border-radius: 999px; font-size: .72rem; font-weight: 700; backdrop-filter: blur(10px); z-index: 2; }
+    .bento-caption { padding: 16px 20px; }
+    .bento-caption h4 { font-size: .9rem; font-weight: 700; margin-bottom: 4px; }
+    .bento-caption p { font-size: .78rem; color: var(--muted); }
+
+    /* LIGHTBOX */
+    .lightbox { position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,.92); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .3s; }
+    .lightbox.open { opacity: 1; pointer-events: all; }
+    .lightbox img { max-width: min(90vw,900px); max-height: 90vh; border-radius: var(--radius); border: 1px solid var(--border2); box-shadow: 0 40px 120px rgba(0,0,0,.8); image-rendering: pixelated; }
+    .lb-close { position: absolute; top: 24px; right: 28px; font-size: 1.8rem; cursor: pointer; color: var(--muted); background: none; border: none; transition: color .2s; line-height: 1; }
+    .lb-close:hover { color: var(--text); }
+    .lb-caption { position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.6); backdrop-filter: blur(8px); border: 1px solid var(--border); border-radius: 999px; padding: 8px 24px; font-size: .82rem; color: var(--muted); white-space: nowrap; }
+
+    /* MISC */
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border) 50%, transparent); }
+    .glow-top { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 800px; height: 500px; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,144,0,.06) 0%, transparent 70%); pointer-events: none; }
+    .tip-box { margin-top: 32px; padding: 20px 24px; background: rgba(255,144,0,.05); border: 1px solid rgba(255,144,0,.2); border-radius: var(--radius); display: flex; gap: 12px; align-items: flex-start; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 3px; }
+
+    /* FOOTER */
+    footer { position: relative; z-index: 1; background: var(--bg2); border-top: 1px solid var(--border); padding: 56px 5% 40px; }
+    .footer-top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 40px; margin-bottom: 48px; }
+    .footer-brand h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; }
+    .footer-brand p { font-size: .85rem; color: var(--muted); max-width: 280px; line-height: 1.65; }
+    .footer-col h4 { font-size: .8rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col ul li a { font-size: .875rem; color: var(--muted); text-decoration: none; transition: color .2s; }
+    .footer-col ul li a:hover { color: var(--text); }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 32px; border-top: 1px solid var(--border); }
+    .footer-bottom p { font-size: .8rem; color: var(--muted); }
+    .teamkraken { color: var(--gold); font-weight: 700; }
+
+    @media (max-width: 1024px) { .config-grid { grid-template-columns: 1fr; } .states-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { .bento-grid { grid-template-columns: 1fr 1fr; } .bento-card.span2 { grid-column: span 2; } .bento-card.span3 { grid-column: span 2; } }
+    @media (max-width: 768px) { .nav-links { display: none; } .hamburger { display: flex; } .footer-top { flex-direction: column; } .bento-grid { grid-template-columns: 1fr; } .bento-card.span2,.bento-card.span3 { grid-column: span 1; } }
+    @media (max-width: 480px) { .hero-stats { gap: 32px; } .ph-grid,.perm-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#"><div class="dot"></div>FRewards</a>
+  <ul class="nav-links">
+    <li><a href="#features"     data-i18n="nav.features">Características</a></li>
+    <li><a href="#preview"      data-i18n="nav.preview">Vista Previa</a></li>
+    <li><a href="#commands"     data-i18n="nav.commands">Comandos</a></li>
+    <li><a href="#permissions"  data-i18n="nav.permissions">Permisos</a></li>
+    <li><a href="#config"       data-i18n="nav.config">Configuración</a></li>
+    <li><a href="#how"          data-i18n="nav.install">Instalación</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="lang-btn" id="langToggle" onclick="toggleLang()">EN</button>
+    <a href="#requirements" class="nav-btn" data-i18n="nav.download">Descargar</a>
+  </div>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="glow-top"></div>
+  <div class="hero-badge"><div class="pulse"></div><span data-i18n="hero.badge">Paper 1.21+ · v2.0 · TeamKraken</span></div>
+  <h1 data-i18n="hero.title">Recompensas Diarias<br/>Para tu Servidor</h1>
+  <p class="hero-sub" data-i18n="hero.sub">Sistema de recompensas totalmente configurable con GUI visual, editor en vivo, cooldowns por rango, entrega de ítems y comandos, soporte HEX completo y notificaciones automáticas.</p>
+  <div class="hero-actions">
+    <a href="#how"      class="btn-primary" data-i18n="hero.cta1">Empezar ahora</a>
+    <a href="#preview"  class="btn-ghost"   data-i18n="hero.cta2">Ver capturas</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="val">∞</div><div class="lbl" data-i18n="hero.stat1">Recompensas</div></div>
+    <div class="hero-stat"><div class="val">3</div><div class="lbl" data-i18n="hero.stat2">Estados</div></div>
+    <div class="hero-stat"><div class="val">1.21+</div><div class="lbl" data-i18n="hero.stat3">Compatible</div></div>
+    <div class="hero-stat"><div class="val">100%</div><div class="lbl" data-i18n="hero.stat4">Configurable</div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<section id="features" style="background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);">
+  <div class="section-head">
+    <div class="section-label" data-i18n="feat.label">Características</div>
+    <h2 class="section-title" data-i18n="feat.title">Todo en un solo plugin</h2>
+    <p class="section-sub" data-i18n="feat.sub">Diseñado para servidores de Minecraft modernos que necesitan un sistema de recompensas flexible y fácil de administrar.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,144,0,.1);">🎁</div>
+      <h3 data-i18n="feat.f1.t">GUI Visual Completa</h3>
+      <p data-i18n="feat.f1.d">Inventario completamente personalizable: título, tamaño, slot de cada recompensa, materiales por estado y botones de acción configurables vía YAML.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(34,197,94,.1);">⏱</div>
+      <h3 data-i18n="feat.f2.t">Cooldown por Recompensa</h3>
+      <p data-i18n="feat.f2.d">Cada recompensa tiene su propio cooldown independiente. Soporte para valores como 86400 (24h). El tiempo restante se muestra en el lore en tiempo real.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(147,51,234,.1);">🔒</div>
+      <h3 data-i18n="feat.f3.t">Permisos por Recompensa</h3>
+      <p data-i18n="feat.f3.d">Cada recompensa requiere un permiso específico (<code>frewards.&lt;id&gt;</code>). Si el jugador no lo tiene, ve el estado Bloqueada con lore personalizado.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,144,0,.1);">🎨</div>
+      <h3 data-i18n="feat.f4.t">Colores HEX Completos</h3>
+      <p data-i18n="feat.f4.d">Soporte total para colores hexadecimales (<code>&#RRGGBB</code>), degradados por letra y códigos legacy en todos los campos: nombres, lore, títulos y subtítulos.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(34,197,94,.1);">📦</div>
+      <h3 data-i18n="feat.f5.t">Ítems Físicos + Comandos</h3>
+      <p data-i18n="feat.f5.d">Al reclamar, el plugin puede entregar ítems configurados por el editor GUI y ejecutar múltiples comandos de consola con soporte para el placeholder <code>%player%</code>.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,76,0,.1);">✏️</div>
+      <h3 data-i18n="feat.f6.t">Editor GUI en Vivo</h3>
+      <p data-i18n="feat.f6.d">Gestiona todas las recompensas desde el juego sin tocar ningún archivo YAML. Edita ítems, comandos, cooldown y nombre visual directamente in-game.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(252,208,92,.1);">🔔</div>
+      <h3 data-i18n="feat.f7.t">Notificación al Conectar</h3>
+      <p data-i18n="feat.f7.d">Al entrar al servidor, el jugador recibe automáticamente un mensaje indicando cuántas recompensas tiene pendientes de reclamar.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(34,197,94,.1);">🌐</div>
+      <h3 data-i18n="feat.f8.t">Multi-idioma (ES / EN)</h3>
+      <p data-i18n="feat.f8.d">Sistema de idiomas con archivos <code>lang_es.yml</code> y <code>lang_en.yml</code> intercambiables desde <code>config.yml</code> sin reiniciar el servidor.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,144,0,.1);">🎬</div>
+      <h3 data-i18n="feat.f9.t">Título + Sonido al Reclamar</h3>
+      <p data-i18n="feat.f9.d">Cada recompensa puede mostrar un título/subtítulo en pantalla y reproducir un sonido personalizado al ser reclamada exitosamente.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(147,51,234,.1);">🔄</div>
+      <h3 data-i18n="feat.f10.t">Reload sin Reiniciar</h3>
+      <p data-i18n="feat.f10.d">Recarga toda la configuración en caliente con <code>/frewards reload</code>. Los cambios del editor GUI se aplican inmediatamente sin interrupciones.</p>
+    </div>
+  </div>
+
+  <!-- REWARD STATES -->
+  <div style="margin-top:72px;">
+    <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:8px;" data-i18n="states.title">Los 3 estados de una recompensa</h3>
+    <p style="color:var(--muted);font-size:.875rem;margin-bottom:32px;" data-i18n="states.sub">Cada recompensa se muestra diferente según la situación del jugador.</p>
+    <div class="states-grid">
+      <div class="state-card available">
+        <div class="state-dot"></div>
+        <h3 data-i18n="state.a.t">✔ Disponible</h3>
+        <p data-i18n="state.a.d">El jugador tiene el permiso y el cooldown ha expirado. Puede hacer clic para reclamar la recompensa inmediatamente.</p>
+      </div>
+      <div class="state-card progress">
+        <div class="state-dot"></div>
+        <h3 data-i18n="state.p.t">⏳ En Progreso</h3>
+        <p data-i18n="state.p.d">El jugador ya reclamó la recompensa y está esperando que expire el cooldown. El lore muestra el tiempo restante con el placeholder <code style="color:#fde68a;background:rgba(253,230,138,.1);padding:1px 4px;border-radius:3px;">%cooldown_id%</code>.</p>
+      </div>
+      <div class="state-card locked">
+        <div class="state-dot"></div>
+        <h3 data-i18n="state.l.t">✘ Bloqueada</h3>
+        <p data-i18n="state.l.d">El jugador no tiene el permiso requerido para esta recompensa. El lore muestra qué permiso o rango necesita para desbloquearla.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- PREVIEW -->
+<section id="preview">
+  <div class="section-head">
+    <div class="section-label" data-i18n="prev.label">Vista Previa</div>
+    <h2 class="section-title" data-i18n="prev.title">El plugin en acción</h2>
+    <p class="section-sub" data-i18n="prev.sub">Capturas reales del plugin funcionando en un servidor de Minecraft.</p>
+  </div>
+  <div class="bento-grid">
+
+    <!-- Notificación de entrada — wide -->
+    <div class="bento-card span3" onclick="openLb('img/chat-notify.png',this)">
+      <div class="bento-badge" style="background:rgba(252,208,92,.15);border:1px solid rgba(252,208,92,.4);color:var(--yellow);" data-i18n="prev.b0">🔔 Notificación</div>
+      <div class="bento-img-wrap">
+        <img src="img/chat-notify.png" alt="Notificación de entrada" />
+        <div class="bento-overlay"></div><div class="bento-zoom">🔍</div>
+      </div>
+      <div class="bento-caption">
+        <h4 data-i18n="prev.c0.t">Notificación al conectar</h4>
+        <p data-i18n="prev.c0.d">Al entrar al servidor, el jugador ve cuántas recompensas tiene disponibles para reclamar.</p>
+      </div>
+    </div>
+
+    <!-- Disponible -->
+    <div class="bento-card" onclick="openLb('img/reward-available.png',this)">
+      <div class="bento-badge" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:var(--green);" data-i18n="prev.b1">✔ Disponible</div>
+      <div class="bento-img-wrap">
+        <img src="img/reward-available.png" alt="Recompensa disponible" />
+        <div class="bento-overlay"></div><div class="bento-zoom">🔍</div>
+      </div>
+      <div class="bento-caption">
+        <h4 data-i18n="prev.c1.t">Estado: Disponible</h4>
+        <p data-i18n="prev.c1.d">El jugador tiene permiso y el cooldown expiró. Muestra el contenido completo de la recompensa.</p>
+      </div>
+    </div>
+
+    <!-- En progreso -->
+    <div class="bento-card" onclick="openLb('img/reward-progress.png',this)">
+      <div class="bento-badge" style="background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.4);color:#eab308;" data-i18n="prev.b2">⏳ En Progreso</div>
+      <div class="bento-img-wrap">
+        <img src="img/reward-progress.png" alt="Recompensa en progreso" />
+        <div class="bento-overlay"></div><div class="bento-zoom">🔍</div>
+      </div>
+      <div class="bento-caption">
+        <h4 data-i18n="prev.c2.t">Estado: En Progreso</h4>
+        <p data-i18n="prev.c2.d">El cooldown activo se muestra en el lore con cuenta atrás en tiempo real.</p>
+      </div>
+    </div>
+
+    <!-- Bloqueada -->
+    <div class="bento-card" onclick="openLb('img/reward-locked.png',this)">
+      <div class="bento-badge" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:var(--red);" data-i18n="prev.b3">✘ Bloqueada</div>
+      <div class="bento-img-wrap">
+        <img src="img/reward-locked.png" alt="Recompensa bloqueada" />
+        <div class="bento-overlay"></div><div class="bento-zoom">🔍</div>
+      </div>
+      <div class="bento-caption">
+        <h4 data-i18n="prev.c3.t">Estado: Bloqueada</h4>
+        <p data-i18n="prev.c3.d">Sin el permiso necesario, el jugador ve la recompensa como inaccesible.</p>
+      </div>
+    </div>
+
+    <!-- Editor Selector -->
+    <div class="bento-card" onclick="openLb('img/editor-selector.png',this)">
+      <div class="bento-badge" style="background:rgba(255,144,0,.15);border:1px solid rgba(255,144,0,.4);color:var(--gold);" data-i18n="prev.b4">✏️ Editor</div>
+      <div class="bento-img-wrap">
+        <img src="img/editor-selector.png" alt="Editor Selector" />
+        <div class="bento-overlay"></div><div class="bento-zoom">🔍</div>
+      </div>
+      <div class="bento-caption">
+        <h4 data-i18n="prev.c4.t">Selector de Recompensas</h4>
+        <p data-i18n="prev.c4.d">Lista todas las recompensas configuradas. Haz clic en una para abrir su editor.</p>
+      </div>
+    </div>
+
+    <!-- Editor Items -->
+    <div class="bento-card" onclick="openLb('img/editor-items.png',this)">
+      <div class="bento-badge" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:var(--green);" data-i18n="prev.b5">📦 Ítems</div>
+      <div class="bento-img-wrap">
+        <img src="img/editor-items.png" alt="Editor Ítems" />
+        <div class="bento-overlay"></div><div class="bento-zoom">🔍</div>
+      </div>
+      <div class="bento-caption">
+        <h4 data-i18n="prev.c5.t">Editar Ítems</h4>
+        <p data-i18n="prev.c5.d">Arrastra ítems al área para que sean entregados al reclamar la recompensa.</p>
+      </div>
+    </div>
+
+    <!-- Editor Comandos -->
+    <div class="bento-card" onclick="openLb('img/editor-commands.png',this)">
+      <div class="bento-badge" style="background:rgba(252,208,92,.15);border:1px solid rgba(252,208,92,.4);color:var(--yellow);" data-i18n="prev.b6">⌨ Comandos</div>
+      <div class="bento-img-wrap">
+        <img src="img/editor-commands.png" alt="Editor Comandos" />
+        <div class="bento-overlay"></div><div class="bento-zoom">🔍</div>
+      </div>
+      <div class="bento-caption">
+        <h4 data-i18n="prev.c6.t">Editar Comandos</h4>
+        <p data-i18n="prev.c6.d">Añade, visualiza y elimina los comandos ejecutados al reclamar. Clic en uno para eliminarlo.</p>
+      </div>
+    </div>
+
+    <!-- Editor Cooldown -->
+    <div class="bento-card" onclick="openLb('img/editor-cooldown.png',this)">
+      <div class="bento-badge" style="background:rgba(255,144,0,.15);border:1px solid rgba(255,144,0,.4);color:var(--gold);" data-i18n="prev.b7">⌚ Cooldown</div>
+      <div class="bento-img-wrap">
+        <img src="img/editor-cooldown.png" alt="Editor Cooldown" />
+        <div class="bento-overlay"></div><div class="bento-zoom">🔍</div>
+      </div>
+      <div class="bento-caption">
+        <h4 data-i18n="prev.c7.t">Editar Cooldown</h4>
+        <p data-i18n="prev.c7.d">Selecciona entre presets configurables o escribe un valor personalizado en segundos.</p>
+      </div>
+    </div>
+
+    <!-- Editor Nombre -->
+    <div class="bento-card" onclick="openLb('img/editor-name.png',this)">
+      <div class="bento-badge" style="background:rgba(147,51,234,.15);border:1px solid rgba(147,51,234,.4);color:#a78bfa;" data-i18n="prev.b8">✎ Nombre</div>
+      <div class="bento-img-wrap">
+        <img src="img/editor-name.png" alt="Editor Nombre" />
+        <div class="bento-overlay"></div><div class="bento-zoom">🔍</div>
+      </div>
+      <div class="bento-caption">
+        <h4 data-i18n="prev.c8.t">Editar Nombre</h4>
+        <p data-i18n="prev.c8.d">Cambia el nombre visible de la recompensa en el menú con soporte HEX completo.</p>
+      </div>
+    </div>
+
+    <!-- Editor Eliminar -->
+    <div class="bento-card" onclick="openLb('img/editor-delete.png',this)">
+      <div class="bento-badge" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:var(--red);" data-i18n="prev.b9">⊘ Eliminar</div>
+      <div class="bento-img-wrap">
+        <img src="img/editor-delete.png" alt="Editor Eliminar" />
+        <div class="bento-overlay"></div><div class="bento-zoom">🔍</div>
+      </div>
+      <div class="bento-caption">
+        <h4 data-i18n="prev.c9.t">Eliminar Recompensa</h4>
+        <p data-i18n="prev.c9.d">Elimina la recompensa del archivo de configuración. Requiere Shift+Clic para confirmar.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLb(event)">
+  <button class="lb-close" onclick="closeLb()">✕</button>
+  <img id="lb-img" src="" alt="" />
+  <div class="lb-caption" id="lb-cap"></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- COMMANDS -->
+<section id="commands">
+  <div class="section-head">
+    <div class="section-label" data-i18n="cmd.label">Comandos</div>
+    <h2 class="section-title" data-i18n="cmd.title">Comandos del plugin</h2>
+    <p class="section-sub" data-i18n="cmd.sub">Comandos para jugadores y administradores con autocompletado integrado.</p>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('player',this)" data-i18n="cmd.tab1">👤 Jugadores</button>
+    <button class="tab" onclick="switchTab('admin',this)"  data-i18n="cmd.tab2">🛡 Administración</button>
+  </div>
+
+  <div id="tab-player" class="tab-content active">
+    <table class="cmd-table">
+      <thead><tr>
+        <th data-i18n="cmd.th1">Comando</th>
+        <th data-i18n="cmd.th2">Descripción</th>
+        <th data-i18n="cmd.th3">Permiso</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="cmd-mono">/frewards</span></td>
+          <td data-i18n="cmd.p1">Abre el menú de recompensas diarias.</td>
+          <td><span class="badge-all">frewards.use</span></td>
+        </tr>
+        <tr>
+          <td><span class="cmd-mono">/rewards</span></td>
+          <td data-i18n="cmd.p2">Alias de <code>/frewards</code>. Abre el mismo menú.</td>
+          <td><span class="badge-all">frewards.use</span></td>
+        </tr>
+        <tr>
+          <td><span class="cmd-mono">/recompensas</span></td>
+          <td data-i18n="cmd.p3">Alias de <code>/frewards</code> en español.</td>
+          <td><span class="badge-all">frewards.use</span></td>
+        </tr>
+        <tr>
+          <td><span class="cmd-mono">/frewards help</span></td>
+          <td data-i18n="cmd.p4">Muestra el panel de ayuda con todos los subcomandos disponibles.</td>
+          <td><span class="badge-all">frewards.use</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="tab-admin" class="tab-content">
+    <table class="cmd-table">
+      <thead><tr>
+        <th data-i18n="cmd.th1">Comando</th>
+        <th data-i18n="cmd.th2">Descripción</th>
+        <th data-i18n="cmd.th3">Permiso</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="cmd-mono">/frewards editor</span></td>
+          <td data-i18n="cmd.a1">Abre el selector de recompensas del editor GUI. Muestra todas las recompensas configuradas.</td>
+          <td><span class="badge-op">frewards.editor</span></td>
+        </tr>
+        <tr>
+          <td><span class="cmd-mono">/frewards editor &lt;id&gt;</span></td>
+          <td data-i18n="cmd.a2">Abre directamente el editor de una recompensa específica por su ID (ej: <code>ros</code>, <code>venus</code>).</td>
+          <td><span class="badge-op">frewards.editor</span></td>
+        </tr>
+        <tr>
+          <td><span class="cmd-mono">/frewards reload</span></td>
+          <td data-i18n="cmd.a3">Recarga <code>rewardsgui.yml</code>, <code>messages.yml</code>, <code>editor.yml</code> y el idioma activo sin reiniciar.</td>
+          <td><span class="badge-op">frewards.reload</span></td>
+        </tr>
+        <tr>
+          <td><span class="cmd-mono">/frewards reset &lt;jugador&gt;</span></td>
+          <td data-i18n="cmd.a4">Reinicia todos los cooldowns de un jugador para que pueda reclamar todas las recompensas de nuevo.</td>
+          <td><span class="badge-op">frewards.admin</span></td>
+        </tr>
+        <tr>
+          <td><span class="cmd-mono">/frewardsreload</span></td>
+          <td data-i18n="cmd.a5">Comando rápido para recargar el plugin sin argumentos extra.</td>
+          <td><span class="badge-op">frewards.reload</span></td>
+        </tr>
+        <tr>
+          <td><span class="cmd-mono">/frewardsreset &lt;jugador&gt;</span></td>
+          <td data-i18n="cmd.a6">Comando rápido para reiniciar cooldowns de un jugador.</td>
+          <td><span class="badge-op">frewards.admin</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip-box">
+    <span style="font-size:1.2rem;flex-shrink:0;">💡</span>
+    <div>
+      <strong style="font-size:.875rem;color:var(--gold);" data-i18n="cmd.tip.t">Autocompletado integrado</strong>
+      <p style="font-size:.82rem;color:var(--muted);margin-top:4px;" data-i18n="cmd.tip.d">El plugin incluye un <code>TabCompleter</code> que sugiere subcomandos e IDs de recompensas automáticamente al escribir en el chat.</p>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- PERMISSIONS -->
+<section id="permissions" style="background:var(--bg2);">
+  <div class="section-head">
+    <div class="section-label" data-i18n="perm.label">Permisos</div>
+    <h2 class="section-title" data-i18n="perm.title">Sistema de permisos</h2>
+    <p class="section-sub" data-i18n="perm.sub">Control total sobre quién puede hacer qué, tanto para jugadores como para administradores y por rango de recompensa.</p>
+  </div>
+
+  <h3 style="font-size:.85rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;" data-i18n="perm.general">— Permisos generales</h3>
+  <div class="perm-grid" style="margin-bottom:48px;">
+    <div class="perm-card">
+      <div class="perm-node">frewards.use</div>
+      <div class="perm-desc" data-i18n="perm.use">Permite abrir el menú de recompensas con /frewards, /rewards y /recompensas.</div>
+      <span class="perm-default true" data-i18n="perm.default.true">default: todos los jugadores</span>
+    </div>
+    <div class="perm-card">
+      <div class="perm-node">frewards.editor</div>
+      <div class="perm-desc" data-i18n="perm.editor">Permite abrir el editor GUI con /frewards editor y /frewards editor &lt;id&gt;.</div>
+      <span class="perm-default op" data-i18n="perm.default.op">default: OP</span>
+    </div>
+    <div class="perm-card">
+      <div class="perm-node">frewards.reload</div>
+      <div class="perm-desc" data-i18n="perm.reload">Permite recargar la configuración del plugin con /frewards reload.</div>
+      <span class="perm-default op" data-i18n="perm.default.op">default: OP</span>
+    </div>
+    <div class="perm-card">
+      <div class="perm-node">frewards.admin</div>
+      <div class="perm-desc" data-i18n="perm.admin">Permite reiniciar cooldowns de jugadores con /frewards reset y /frewardsreset.</div>
+      <span class="perm-default op" data-i18n="perm.default.op">default: OP</span>
+    </div>
+  </div>
+
+  <h3 style="font-size:.85rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;" data-i18n="perm.rewards">— Permisos por recompensa</h3>
+  <div class="perm-grid">
+    <div class="perm-card">
+      <div class="perm-node">frewards.&lt;reward_id&gt;</div>
+      <div class="perm-desc" data-i18n="perm.rid">Cada recompensa tiene su propio permiso basado en su ID. Sin él, el jugador ve el estado Bloqueada.</div>
+      <span class="perm-default false" data-i18n="perm.default.false">default: false (configurable)</span>
+    </div>
+    <div class="perm-card">
+      <div class="perm-node" style="font-size:.75rem;">frewards.ros<br/>frewards.venus<br/>frewards.apolo…</div>
+      <div class="perm-desc" data-i18n="perm.examples">Ejemplos con los IDs del servidor. Asigna estos permisos a los grupos de LuckPerms según el rango del jugador.</div>
+      <span class="perm-default false" data-i18n="perm.pergroup">típicamente por grupo/rango</span>
+    </div>
+  </div>
+
+  <div class="tip-box" style="margin-top:32px;">
+    <span style="font-size:1.2rem;flex-shrink:0;">⭐</span>
+    <div>
+      <strong style="font-size:.875rem;color:var(--gold);" data-i18n="perm.tip.t">Integración con LuckPerms</strong>
+      <p style="font-size:.82rem;color:var(--muted);margin-top:4px;" data-i18n="perm.tip.d">Asigna <code>frewards.user</code> al grupo <em>user</em>, <code>frewards.ros</code> al grupo <em>ros</em>, etc. El plugin detecta el permiso al abrir la GUI y muestra el estado correcto para cada jugador.</p>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- PLACEHOLDERS -->
+<section id="placeholders">
+  <div class="section-head">
+    <div class="section-label" data-i18n="ph.label">Placeholders</div>
+    <h2 class="section-title" data-i18n="ph.title">Variables internas</h2>
+    <p class="section-sub" data-i18n="ph.sub">Usa estos placeholders dentro del lore de cada recompensa en <code>rewardsgui.yml</code>.</p>
+  </div>
+  <div class="ph-grid">
+    <div class="ph-card">
+      <div class="ph-name">%cooldown_&lt;id&gt;%</div>
+      <div class="ph-desc" data-i18n="ph.p1">Tiempo restante formateado del cooldown de la recompensa con ese ID. Se actualiza cada vez que el jugador abre la GUI.</div>
+      <div class="ph-example">▸ ej. %cooldown_ros% → "23h 50m 12s"</div>
+    </div>
+    <div class="ph-card">
+      <div class="ph-name">%reward_name%</div>
+      <div class="ph-desc" data-i18n="ph.p2">Nombre con color de la recompensa tal como está definido en el campo <code>name</code> de <code>rewardsgui.yml</code>.</div>
+      <div class="ph-example">▸ ej. %reward_name% → "§aROS" (con color)</div>
+    </div>
+    <div class="ph-card">
+      <div class="ph-name">%player%</div>
+      <div class="ph-desc" data-i18n="ph.p3">Nombre del jugador que reclama la recompensa. Disponible dentro del campo <code>commands</code> de cada recompensa.</div>
+      <div class="ph-example">▸ ej. "kit give %player% vip" → "kit give Steve vip"</div>
+    </div>
+    <div class="ph-card">
+      <div class="ph-name">%rewards%</div>
+      <div class="ph-desc" data-i18n="ph.p4">Número de recompensas disponibles para el jugador. Usado en el mensaje de notificación al conectar (<code>messages.yml</code>).</div>
+      <div class="ph-example">▸ ej. "Tienes %rewards% recompensas" → "Tienes 4 recompensas"</div>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- CONFIG -->
+<section id="config" style="background:var(--bg2);">
+  <div class="section-head">
+    <div class="section-label" data-i18n="cfg.label">Configuración</div>
+    <h2 class="section-title" data-i18n="cfg.title">Archivos de configuración</h2>
+    <p class="section-sub" data-i18n="cfg.sub">Toda la personalización se realiza mediante archivos YAML. El editor GUI escribe directamente en <code>rewardsgui.yml</code>.</p>
+  </div>
+  <div class="config-grid">
+    <!-- rewardsgui.yml -->
+    <div>
+      <h3 style="font-size:1rem;font-weight:700;margin-bottom:6px;">rewardsgui.yml</h3>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:20px;" data-i18n="cfg.rg.desc">Define las recompensas, sus estados, lore, comandos, cooldown y slot.</p>
+      <div class="code-block">
+        <div class="code-header"><div class="dots"><span style="background:#ff5f57"></span><span style="background:#febc2e"></span><span style="background:#28c840"></span></div><span>rewardsgui.yml</span></div>
+        <div class="code-body"><pre><span class="y-c"># Materiales por estado</span>
+<span class="y-k">material-state</span><span class="y-v">:</span>
+  <span class="y-k">disponible</span><span class="y-v">:</span> <span class="y-s">"CHEST_MINECART"</span>
+  <span class="y-k">progreso</span><span class="y-v">:</span>   <span class="y-s">"FURNACE_MINECART"</span>
+  <span class="y-k">noperm</span><span class="y-v">:</span>    <span class="y-s">"TNT_MINECART"</span>
+
+<span class="y-k">gui</span><span class="y-v">:</span>
+  <span class="y-k">title</span><span class="y-v">:</span> <span class="y-s">"&#FF9000▸ &#FF4C00Baltiamc Rewards"</span>
+  <span class="y-k">size</span><span class="y-v">:</span>  <span class="y-v">45</span>
+
+<span class="y-k">rewards</span><span class="y-v">:</span>
+  <span class="y-k">ros</span><span class="y-v">:</span>
+    <span class="y-k">name</span><span class="y-v">:</span>         <span class="y-s">"&#46d603&lROS"</span>
+    <span class="y-k">display-name</span><span class="y-v">:</span> <span class="y-s">'Recompensa <span class="y-ph">%reward_name%</span>'</span>
+    <span class="y-k">permission</span><span class="y-v">:</span>   <span class="y-s">frewards.ros</span>
+    <span class="y-k">cooldown</span><span class="y-v">:</span>     <span class="y-v">86400</span>
+    <span class="y-k">slot</span><span class="y-v">:</span>         <span class="y-v">12</span>
+    <span class="y-k">sound</span><span class="y-v">:</span>        <span class="y-s">"ENTITY_PLAYER_LEVELUP"</span>
+    <span class="y-k">title</span><span class="y-v">:</span>        <span class="y-s">"&#00FF00¡RECOMPENSA DIARIA!"</span>
+    <span class="y-k">subtitle</span><span class="y-v">:</span>     <span class="y-s">"¡Reclamada con éxito!"</span>
+    <span class="y-k">commands</span><span class="y-v">:</span>
+      - <span class="y-s">"crates key give <span class="y-ph">%player%</span> comun 4"</span>
+    <span class="y-k">lore</span><span class="y-v">:</span>
+      <span class="y-k">disponible</span><span class="y-v">:</span>
+        - <span class="y-s">'&8Descripción'</span>
+        - <span class="y-s">'  &8▪ Estado: &aDisponible ✔'</span>
+        - <span class="y-s">'  &8▪ Cooldown &e24 Horas ⌚'</span>
+      <span class="y-k">progreso</span><span class="y-v">:</span>
+        - <span class="y-s">'  &8▪ Estado: &eEn progreso'</span>
+        - <span class="y-s">'  &8▪ Cooldown &c<span class="y-ph">%cooldown_ros%</span>'</span>
+      <span class="y-k">noperm</span><span class="y-v">:</span>
+        - <span class="y-s">'  &8▪ Estado: &cBloqueada ✘'</span>
+        - <span class="y-s">'  &8▪ Requieres: <span class="y-ph">%reward_name%</span> ₪'</span></pre></div>
+      </div>
+    </div>
+
+    <!-- messages + config + editor -->
+    <div style="display:flex;flex-direction:column;gap:28px;">
+      <div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:6px;">config.yml</h3>
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px;" data-i18n="cfg.c.desc">Prefijo y configuraciones globales.</p>
+        <div class="code-block">
+          <div class="code-header"><div class="dots"><span style="background:#ff5f57"></span><span style="background:#febc2e"></span><span style="background:#28c840"></span></div><span>config.yml</span></div>
+          <div class="code-body"><pre><span class="y-k">prefix</span><span class="y-v">:</span> <span class="y-s">"&#FCD05C&lRECOMPENSAS &7›› "</span></pre></div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:6px;">messages.yml</h3>
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px;" data-i18n="cfg.m.desc">Todos los mensajes del sistema son configurables.</p>
+        <div class="code-block">
+          <div class="code-header"><div class="dots"><span style="background:#ff5f57"></span><span style="background:#febc2e"></span><span style="background:#28c840"></span></div><span>messages.yml</span></div>
+          <div class="code-body"><pre><span class="y-k">reward-claimed</span><span class="y-v">:</span>  <span class="y-s">"&a✅ ¡Reclamada con éxito!"</span>
+<span class="y-k">reward-cooldown</span><span class="y-v">:</span> <span class="y-s">"&e⏳ Todavía no puedes reclamar."</span>
+<span class="y-k">no-permission</span><span class="y-v">:</span>  <span class="y-s">"&c⛔ Sin permiso."</span>
+<span class="y-k">reload-success</span><span class="y-v">:</span> <span class="y-s">"&a🔄 Plugin recargado."</span>
+
+<span class="y-k">join-notify</span><span class="y-v">:</span>
+  <span class="y-k">singular</span><span class="y-v">:</span> <span class="y-s">"&fTienes &e<span class="y-ph">%rewards%</span> &frecompensa..."</span>
+  <span class="y-k">plural</span><span class="y-v">:</span>   <span class="y-s">"&fTienes &e<span class="y-ph">%rewards%</span> &frecompensas..."</span></pre></div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:6px;">editor.yml</h3>
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px;" data-i18n="cfg.e.desc">Personaliza los GUIs del editor: colores, materiales, slots y presets de cooldown.</p>
+        <div class="code-block">
+          <div class="code-header"><div class="dots"><span style="background:#ff5f57"></span><span style="background:#febc2e"></span><span style="background:#28c840"></span></div><span>editor.yml</span></div>
+          <div class="code-body"><pre><span class="y-k">selector</span><span class="y-v">:</span>
+  <span class="y-k">title-prefix</span><span class="y-v">:</span> <span class="y-s">"&#FF9000▸ &#FF4C00Editor"</span>
+  <span class="y-k">filler</span><span class="y-v">:</span>       <span class="y-s">"GRAY_STAINED_GLASS_PANE"</span>
+
+<span class="y-k">cooldown</span><span class="y-v">:</span>
+  <span class="y-k">presets</span><span class="y-v">:</span>
+    - <span class="y-k">slot</span><span class="y-v">:</span>    <span class="y-v">10</span>
+      <span class="y-k">name</span><span class="y-v">:</span>    <span class="y-s">"24 Horas"</span>
+      <span class="y-k">seconds</span><span class="y-v">:</span> <span class="y-v">86400</span>
+      <span class="y-k">material</span><span class="y-v">:</span> <span class="y-s">"CLOCK"</span>
+    - <span class="y-k">slot</span><span class="y-v">:</span>    <span class="y-v">11</span>
+      <span class="y-k">name</span><span class="y-v">:</span>    <span class="y-s">"1 Hora"</span>
+      <span class="y-k">seconds</span><span class="y-v">:</span> <span class="y-v">3600</span>
+      <span class="y-k">material</span><span class="y-v">:</span> <span class="y-s">"CLOCK"</span></pre></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- data.yml note -->
+  <div style="margin-top:36px;padding:20px 24px;background:rgba(100,116,139,.06);border:1px solid rgba(100,116,139,.2);border-radius:var(--radius);display:flex;gap:12px;align-items:flex-start;">
+    <span style="font-size:1.2rem;flex-shrink:0;">💾</span>
+    <div>
+      <strong style="font-size:.875rem;" data-i18n="cfg.data.t">data.yml — gestionado automáticamente</strong>
+      <p style="font-size:.82rem;color:var(--muted);margin-top:4px;" data-i18n="cfg.data.d">El plugin guarda los timestamps de cooldown y los ítems físicos de cada recompensa en <code>data.yml</code>. No es necesario editarlo manualmente; el editor GUI lo actualiza automáticamente.</p>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- HOW -->
+<section id="how">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;">
+    <div>
+      <div class="section-label" data-i18n="how.label">Instalación</div>
+      <h2 class="section-title" data-i18n="how.title">Listo en 3 pasos</h2>
+      <p class="section-sub" style="margin-bottom:40px;" data-i18n="how.sub">Instala y configura FRewards en menos de 5 minutos.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3 data-i18n="how.s1.t">Coloca el .jar en /plugins</h3>
+            <p data-i18n="how.s1.d">Descarga <code>FRewards.jar</code> y cópialo en la carpeta <code>plugins/</code> de tu servidor Paper 1.21+. Reinicia para generar los archivos de configuración.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3 data-i18n="how.s2.t">Configura rewardsgui.yml</h3>
+            <p data-i18n="how.s2.d">Abre <code>plugins/FRewards/rewardsgui.yml</code> y añade o edita las recompensas: nombre, permiso, cooldown, slot, lore y comandos. O usa el editor GUI con <code>/frewards editor</code>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3 data-i18n="how.s3.t">Asigna permisos y recarga</h3>
+            <p data-i18n="how.s3.d">Asigna <code>frewards.&lt;id&gt;</code> a los grupos de LuckPerms. Ejecuta <code>/frewards reload</code> y los jugadores ya pueden usar <code>/rewards</code>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label" data-i18n="how.flow.label">Flujo del juego</div>
+      <h2 class="section-title" style="margin-bottom:36px;" data-i18n="how.flow.title">¿Cómo funciona?</h2>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="padding:20px 24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);display:flex;gap:16px;align-items:flex-start;">
+          <div style="font-size:1.5rem;flex-shrink:0;">🔔</div>
+          <div><strong style="font-size:.9rem;" data-i18n="how.fl1.t">Notificación al entrar</strong><p style="font-size:.82rem;color:var(--muted);margin-top:4px;" data-i18n="how.fl1.d">Al conectarse, el jugador recibe un mensaje automático indicando cuántas recompensas tiene disponibles para reclamar.</p></div>
+        </div>
+        <div style="padding:20px 24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);display:flex;gap:16px;align-items:flex-start;">
+          <div style="font-size:1.5rem;flex-shrink:0;">🎮</div>
+          <div><strong style="font-size:.9rem;" data-i18n="how.fl2.t">Abre /rewards</strong><p style="font-size:.82rem;color:var(--muted);margin-top:4px;" data-i18n="how.fl2.d">El inventario muestra todas las recompensas con su estado actual: disponible (verde), en progreso (naranja) o bloqueada (rojo), según los permisos del jugador.</p></div>
+        </div>
+        <div style="padding:20px 24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);display:flex;gap:16px;align-items:flex-start;">
+          <div style="font-size:1.5rem;flex-shrink:0;">✅</div>
+          <div><strong style="font-size:.9rem;" data-i18n="how.fl3.t">Reclama y recibe</strong><p style="font-size:.82rem;color:var(--muted);margin-top:4px;" data-i18n="how.fl3.d">Al hacer clic en una recompensa disponible, el jugador recibe los ítems físicos y se ejecutan los comandos configurados. Se muestra un título en pantalla y un sonido.</p></div>
+        </div>
+        <div style="padding:20px 24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);display:flex;gap:16px;align-items:flex-start;">
+          <div style="font-size:1.5rem;flex-shrink:0;">⏳</div>
+          <div><strong style="font-size:.9rem;" data-i18n="how.fl4.t">Espera el cooldown</strong><p style="font-size:.82rem;color:var(--muted);margin-top:4px;" data-i18n="how.fl4.d">La recompensa pasa a estado "En progreso" mostrando el tiempo restante. El cooldown se guarda en <code>data.yml</code> y persiste entre reinicios.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- REQUIREMENTS -->
+<section id="requirements" style="background:var(--bg2);">
+  <div class="section-head">
+    <div class="section-label" data-i18n="req.label">Requisitos</div>
+    <h2 class="section-title" data-i18n="req.title">Compatibilidad</h2>
+    <p class="section-sub" data-i18n="req.sub">FRewards requiere Paper 1.21+ y Java 17. El resto de dependencias son opcionales.</p>
+  </div>
+  <div class="req-grid">
+    <div class="req-card">
+      <div class="req-icon">☕</div>
+      <h3>Java 17+</h3>
+      <p data-i18n="req.r1">Requiere Java 17 o superior. Compatible con Java 21.</p>
+      <span class="req-tag req-required" data-i18n="req.required">REQUERIDO</span>
+    </div>
+    <div class="req-card">
+      <div class="req-icon">📄</div>
+      <h3>Paper 1.21+</h3>
+      <p data-i18n="req.r2">Diseñado para Paper API 1.21.4. No compatible con Spigot por el uso de Adventure API.</p>
+      <span class="req-tag req-required" data-i18n="req.required">REQUERIDO</span>
+    </div>
+    <div class="req-card">
+      <div class="req-icon">🔌</div>
+      <h3>PlaceholderAPI</h3>
+      <p data-i18n="req.r3">Opcional. Necesario solo si quieres usar <code>%frewards_*%</code> en otros plugins.</p>
+      <span class="req-tag req-optional" data-i18n="req.optional">OPCIONAL</span>
+    </div>
+    <div class="req-card">
+      <div class="req-icon">🔑</div>
+      <h3>LuckPerms</h3>
+      <p data-i18n="req.r4">Recomendado para gestionar los permisos por rango (<code>frewards.ros</code>, etc.). Funciona con cualquier plugin de permisos.</p>
+      <span class="req-tag req-optional" data-i18n="req.optional">RECOMENDADO</span>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <h2>🎁 FRewards</h2>
+      <p data-i18n="footer.brand">Plugin de recompensas diarias para servidores de Minecraft. Desarrollado con ❤️ por TeamKraken.</p>
+    </div>
+    <div class="footer-col">
+      <h4 data-i18n="footer.nav">Navegación</h4>
+      <ul>
+        <li><a href="#features"    data-i18n="nav.features">Características</a></li>
+        <li><a href="#preview"     data-i18n="nav.preview">Vista Previa</a></li>
+        <li><a href="#commands"    data-i18n="nav.commands">Comandos</a></li>
+        <li><a href="#permissions" data-i18n="nav.permissions">Permisos</a></li>
+        <li><a href="#config"      data-i18n="nav.config">Configuración</a></li>
+        <li><a href="#how"         data-i18n="nav.install">Instalación</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4 data-i18n="footer.files">Archivos</h4>
+      <ul>
+        <li><a href="#">rewardsgui.yml</a></li>
+        <li><a href="#">messages.yml</a></li>
+        <li><a href="#">editor.yml</a></li>
+        <li><a href="#">config.yml</a></li>
+        <li><a href="#">data.yml</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4 data-i18n="footer.perms">Permisos</h4>
+      <ul>
+        <li><a href="#">frewards.use</a></li>
+        <li><a href="#">frewards.editor</a></li>
+        <li><a href="#">frewards.reload</a></li>
+        <li><a href="#">frewards.admin</a></li>
+        <li><a href="#">frewards.&lt;id&gt;</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 <span class="teamkraken">TeamKraken</span>. FRewards v2.0 · Paper 1.21+ · by xLeandroMC</p>
+    <p style="font-size:.75rem;color:var(--muted);" data-i18n="footer.made">Hecho con 🧡 para la comunidad de Minecraft</p>
+  </div>
+</footer>
+
+<script>
+/* ── TRANSLATIONS ── */
+const T = {
+  es: {
+    "nav.features":"Características","nav.preview":"Vista Previa","nav.commands":"Comandos",
+    "nav.permissions":"Permisos","nav.config":"Configuración","nav.install":"Instalación","nav.download":"Descargar",
+    "hero.badge":"Paper 1.21+ · v2.0 · TeamKraken",
+    "hero.title":"Recompensas Diarias<br/>Para tu Servidor",
+    "hero.sub":"Sistema de recompensas totalmente configurable con GUI visual, editor en vivo, cooldowns por rango, entrega de ítems y comandos, soporte HEX completo y notificaciones automáticas.",
+    "hero.cta1":"Empezar ahora","hero.cta2":"Ver capturas",
+    "hero.stat1":"Recompensas","hero.stat2":"Estados","hero.stat3":"Compatible","hero.stat4":"Configurable",
+    "feat.label":"Características","feat.title":"Todo en un solo plugin",
+    "feat.sub":"Diseñado para servidores de Minecraft modernos que necesitan un sistema de recompensas flexible y fácil de administrar.",
+    "feat.f1.t":"GUI Visual Completa","feat.f1.d":"Inventario completamente personalizable: título, tamaño, slot de cada recompensa, materiales por estado y botones de acción configurables vía YAML.",
+    "feat.f2.t":"Cooldown por Recompensa","feat.f2.d":"Cada recompensa tiene su propio cooldown independiente. Soporte para valores como 86400 (24h). El tiempo restante se muestra en el lore en tiempo real.",
+    "feat.f3.t":"Permisos por Recompensa","feat.f3.d":"Cada recompensa requiere un permiso específico (<code>frewards.&lt;id&gt;</code>). Si el jugador no lo tiene, ve el estado Bloqueada con lore personalizado.",
+    "feat.f4.t":"Colores HEX Completos","feat.f4.d":"Soporte total para colores hexadecimales (<code>&#RRGGBB</code>), degradados por letra y códigos legacy en todos los campos: nombres, lore, títulos y subtítulos.",
+    "feat.f5.t":"Ítems Físicos + Comandos","feat.f5.d":"Al reclamar, el plugin puede entregar ítems configurados por el editor GUI y ejecutar múltiples comandos de consola con soporte para el placeholder <code>%player%</code>.",
+    "feat.f6.t":"Editor GUI en Vivo","feat.f6.d":"Gestiona todas las recompensas desde el juego sin tocar ningún archivo YAML. Edita ítems, comandos, cooldown y nombre visual directamente in-game.",
+    "feat.f7.t":"Notificación al Conectar","feat.f7.d":"Al entrar al servidor, el jugador recibe automáticamente un mensaje indicando cuántas recompensas tiene pendientes de reclamar.",
+    "feat.f8.t":"Multi-idioma (ES / EN)","feat.f8.d":"Sistema de idiomas con archivos <code>lang_es.yml</code> y <code>lang_en.yml</code> intercambiables desde <code>config.yml</code> sin reiniciar el servidor.",
+    "feat.f9.t":"Título + Sonido al Reclamar","feat.f9.d":"Cada recompensa puede mostrar un título/subtítulo en pantalla y reproducir un sonido personalizado al ser reclamada exitosamente.",
+    "feat.f10.t":"Reload sin Reiniciar","feat.f10.d":"Recarga toda la configuración en caliente con <code>/frewards reload</code>. Los cambios del editor GUI se aplican inmediatamente sin interrupciones.",
+    "states.title":"Los 3 estados de una recompensa","states.sub":"Cada recompensa se muestra diferente según la situación del jugador.",
+    "state.a.t":"✔ Disponible","state.a.d":"El jugador tiene el permiso y el cooldown ha expirado. Puede hacer clic para reclamar la recompensa inmediatamente.",
+    "state.p.t":"⏳ En Progreso","state.p.d":"El jugador ya reclamó la recompensa y está esperando que expire el cooldown. El lore muestra el tiempo restante.",
+    "state.l.t":"✘ Bloqueada","state.l.d":"El jugador no tiene el permiso requerido. El lore muestra qué permiso o rango necesita para desbloquearla.",
+    "prev.label":"Vista Previa","prev.title":"El plugin en acción","prev.sub":"Capturas reales del plugin funcionando en un servidor de Minecraft.",
+    "prev.b0":"🔔 Notificación","prev.b1":"✔ Disponible","prev.b2":"⏳ En Progreso","prev.b3":"✘ Bloqueada",
+    "prev.b4":"✏️ Editor","prev.b5":"📦 Ítems","prev.b6":"⌨ Comandos","prev.b7":"⌚ Cooldown","prev.b8":"✎ Nombre","prev.b9":"⊘ Eliminar",
+    "prev.c0.t":"Notificación al conectar","prev.c0.d":"Al entrar al servidor, el jugador ve cuántas recompensas tiene disponibles para reclamar.",
+    "prev.c1.t":"Estado: Disponible","prev.c1.d":"El jugador tiene permiso y el cooldown expiró. Muestra el contenido completo de la recompensa.",
+    "prev.c2.t":"Estado: En Progreso","prev.c2.d":"El cooldown activo se muestra en el lore con cuenta atrás en tiempo real.",
+    "prev.c3.t":"Estado: Bloqueada","prev.c3.d":"Sin el permiso necesario, el jugador ve la recompensa como inaccesible.",
+    "prev.c4.t":"Selector de Recompensas","prev.c4.d":"Lista todas las recompensas configuradas. Haz clic en una para abrir su editor.",
+    "prev.c5.t":"Editar Ítems","prev.c5.d":"Arrastra ítems al área para que sean entregados al reclamar la recompensa.",
+    "prev.c6.t":"Editar Comandos","prev.c6.d":"Añade, visualiza y elimina los comandos ejecutados al reclamar. Clic en uno para eliminarlo.",
+    "prev.c7.t":"Editar Cooldown","prev.c7.d":"Selecciona entre presets configurables o escribe un valor personalizado en segundos.",
+    "prev.c8.t":"Editar Nombre","prev.c8.d":"Cambia el nombre visible de la recompensa en el menú con soporte HEX completo.",
+    "prev.c9.t":"Eliminar Recompensa","prev.c9.d":"Elimina la recompensa del archivo de configuración. Requiere Shift+Clic para confirmar.",
+    "cmd.label":"Comandos","cmd.title":"Comandos del plugin","cmd.sub":"Comandos para jugadores y administradores con autocompletado integrado.",
+    "cmd.tab1":"👤 Jugadores","cmd.tab2":"🛡 Administración",
+    "cmd.th1":"Comando","cmd.th2":"Descripción","cmd.th3":"Permiso",
+    "cmd.p1":"Abre el menú de recompensas diarias.","cmd.p2":"Alias de <code>/frewards</code>. Abre el mismo menú.","cmd.p3":"Alias de <code>/frewards</code> en español.","cmd.p4":"Muestra el panel de ayuda con todos los subcomandos disponibles.",
+    "cmd.a1":"Abre el selector de recompensas del editor GUI. Muestra todas las recompensas configuradas.","cmd.a2":"Abre directamente el editor de una recompensa específica por su ID.","cmd.a3":"Recarga <code>rewardsgui.yml</code>, <code>messages.yml</code>, <code>editor.yml</code> y el idioma activo.","cmd.a4":"Reinicia todos los cooldowns de un jugador para que pueda reclamar de nuevo.","cmd.a5":"Comando rápido para recargar el plugin.","cmd.a6":"Comando rápido para reiniciar cooldowns de un jugador.",
+    "cmd.tip.t":"Autocompletado integrado","cmd.tip.d":"El plugin incluye un <code>TabCompleter</code> que sugiere subcomandos e IDs de recompensas automáticamente.",
+    "perm.label":"Permisos","perm.title":"Sistema de permisos","perm.sub":"Control total sobre quién puede hacer qué, tanto para jugadores como para administradores y por rango de recompensa.",
+    "perm.general":"— Permisos generales","perm.rewards":"— Permisos por recompensa",
+    "perm.use":"Permite abrir el menú de recompensas con /frewards, /rewards y /recompensas.",
+    "perm.editor":"Permite abrir el editor GUI con /frewards editor y /frewards editor &lt;id&gt;.",
+    "perm.reload":"Permite recargar la configuración del plugin con /frewards reload.",
+    "perm.admin":"Permite reiniciar cooldowns de jugadores con /frewards reset.",
+    "perm.rid":"Cada recompensa tiene su propio permiso basado en su ID. Sin él, el jugador ve el estado Bloqueada.",
+    "perm.examples":"Ejemplos con los IDs del servidor. Asigna estos permisos a los grupos de LuckPerms según el rango del jugador.",
+    "perm.default.true":"default: todos los jugadores","perm.default.op":"default: OP","perm.default.false":"default: false","perm.pergroup":"típicamente por grupo/rango",
+    "perm.tip.t":"Integración con LuckPerms","perm.tip.d":"Asigna <code>frewards.user</code> al grupo <em>user</em>, <code>frewards.ros</code> al grupo <em>ros</em>, etc. El plugin detecta el permiso al abrir la GUI y muestra el estado correcto.",
+    "ph.label":"Placeholders","ph.title":"Variables internas","ph.sub":"Usa estos placeholders dentro del lore de cada recompensa en <code>rewardsgui.yml</code>.",
+    "ph.p1":"Tiempo restante formateado del cooldown de la recompensa con ese ID. Se actualiza cada vez que el jugador abre la GUI.","ph.p2":"Nombre con color de la recompensa tal como está definido en el campo <code>name</code> de <code>rewardsgui.yml</code>.","ph.p3":"Nombre del jugador que reclama la recompensa. Disponible dentro del campo <code>commands</code>.","ph.p4":"Número de recompensas disponibles. Usado en el mensaje de notificación al conectar.",
+    "cfg.label":"Configuración","cfg.title":"Archivos de configuración","cfg.sub":"Toda la personalización se realiza mediante archivos YAML. El editor GUI escribe directamente en <code>rewardsgui.yml</code>.",
+    "cfg.rg.desc":"Define las recompensas, sus estados, lore, comandos, cooldown y slot.","cfg.c.desc":"Prefijo y configuraciones globales.","cfg.m.desc":"Todos los mensajes del sistema son configurables.","cfg.e.desc":"Personaliza los GUIs del editor: colores, materiales, slots y presets de cooldown.",
+    "cfg.data.t":"data.yml — gestionado automáticamente","cfg.data.d":"El plugin guarda los timestamps de cooldown y los ítems físicos de cada recompensa en <code>data.yml</code>. No es necesario editarlo manualmente.",
+    "how.label":"Instalación","how.title":"Listo en 3 pasos","how.sub":"Instala y configura FRewards en menos de 5 minutos.",
+    "how.s1.t":"Coloca el .jar en /plugins","how.s1.d":"Descarga <code>FRewards.jar</code> y cópialo en la carpeta <code>plugins/</code> de tu servidor Paper 1.21+. Reinicia para generar los archivos de configuración.",
+    "how.s2.t":"Configura rewardsgui.yml","how.s2.d":"Abre <code>plugins/FRewards/rewardsgui.yml</code> y añade las recompensas, o usa el editor GUI con <code>/frewards editor</code>.",
+    "how.s3.t":"Asigna permisos y recarga","how.s3.d":"Asigna <code>frewards.&lt;id&gt;</code> a los grupos de LuckPerms. Ejecuta <code>/frewards reload</code> y los jugadores ya pueden usar <code>/rewards</code>.",
+    "how.flow.label":"Flujo del juego","how.flow.title":"¿Cómo funciona?",
+    "how.fl1.t":"Notificación al entrar","how.fl1.d":"Al conectarse, el jugador recibe un mensaje automático indicando cuántas recompensas tiene disponibles.",
+    "how.fl2.t":"Abre /rewards","how.fl2.d":"El inventario muestra todas las recompensas con su estado actual según los permisos del jugador.",
+    "how.fl3.t":"Reclama y recibe","how.fl3.d":"Al hacer clic en una recompensa disponible, el jugador recibe los ítems y se ejecutan los comandos. Se muestra un título y un sonido.",
+    "how.fl4.t":"Espera el cooldown","how.fl4.d":"La recompensa pasa a estado En progreso mostrando el tiempo restante. El cooldown persiste entre reinicios.",
+    "req.label":"Requisitos","req.title":"Compatibilidad","req.sub":"FRewards requiere Paper 1.21+ y Java 17. El resto son opcionales.",
+    "req.r1":"Requiere Java 17 o superior. Compatible con Java 21.","req.r2":"Diseñado para Paper API 1.21.4. No compatible con Spigot.","req.r3":"Opcional. Para usar placeholders en otros plugins.","req.r4":"Recomendado para gestionar permisos por rango.",
+    "req.required":"REQUERIDO","req.optional":"OPCIONAL",
+    "footer.brand":"Plugin de recompensas diarias para servidores de Minecraft. Desarrollado con ❤️ por TeamKraken.","footer.nav":"Navegación","footer.files":"Archivos","footer.perms":"Permisos","footer.made":"Hecho con 🧡 para la comunidad de Minecraft"
+  },
+  en: {
+    "nav.features":"Features","nav.preview":"Preview","nav.commands":"Commands",
+    "nav.permissions":"Permissions","nav.config":"Configuration","nav.install":"Installation","nav.download":"Download",
+    "hero.badge":"Paper 1.21+ · v2.0 · TeamKraken",
+    "hero.title":"Daily Rewards<br/>For Your Server",
+    "hero.sub":"A fully configurable reward system with visual GUI, live in-game editor, per-rank cooldowns, item & command delivery, full HEX color support and automatic join notifications.",
+    "hero.cta1":"Get started","hero.cta2":"View screenshots",
+    "hero.stat1":"Rewards","hero.stat2":"States","hero.stat3":"Compatible","hero.stat4":"Configurable",
+    "feat.label":"Features","feat.title":"Everything in one plugin",
+    "feat.sub":"Built for modern Minecraft servers that need a flexible and easy-to-manage reward system.",
+    "feat.f1.t":"Full Visual GUI","feat.f1.d":"Fully customizable inventory: title, size, slot per reward, materials per state and action buttons configurable via YAML.",
+    "feat.f2.t":"Per-Reward Cooldown","feat.f2.d":"Each reward has its own independent cooldown. Supports values like 86400 (24h). Remaining time is shown in real-time in the lore.",
+    "feat.f3.t":"Per-Reward Permissions","feat.f3.d":"Each reward requires a specific permission (<code>frewards.&lt;id&gt;</code>). Without it, the player sees the Locked state with custom lore.",
+    "feat.f4.t":"Full HEX Color Support","feat.f4.d":"Full support for hex colors (<code>&#RRGGBB</code>), per-character gradients and legacy codes in all fields: names, lore, titles and subtitles.",
+    "feat.f5.t":"Physical Items + Commands","feat.f5.d":"On claim, the plugin can deliver items configured in the GUI editor and run multiple console commands with <code>%player%</code> placeholder support.",
+    "feat.f6.t":"Live GUI Editor","feat.f6.d":"Manage all rewards from in-game without touching any YAML file. Edit items, commands, cooldown and display name directly.",
+    "feat.f7.t":"Join Notification","feat.f7.d":"When joining the server, the player automatically receives a message showing how many rewards are pending to claim.",
+    "feat.f8.t":"Multi-language (ES / EN)","feat.f8.d":"Language system with <code>lang_es.yml</code> and <code>lang_en.yml</code> switchable from <code>config.yml</code> without restarting.",
+    "feat.f9.t":"Title + Sound on Claim","feat.f9.d":"Each reward can display a title/subtitle on screen and play a custom sound when successfully claimed.",
+    "feat.f10.t":"Hot Reload","feat.f10.d":"Reload all configuration on the fly with <code>/frewards reload</code>. GUI editor changes apply immediately.",
+    "states.title":"The 3 reward states","states.sub":"Each reward displays differently based on the player's situation.",
+    "state.a.t":"✔ Available","state.a.d":"The player has the permission and the cooldown has expired. They can click to claim the reward immediately.",
+    "state.p.t":"⏳ In Progress","state.p.d":"The player already claimed the reward and is waiting for the cooldown to expire. The lore shows the remaining time.",
+    "state.l.t":"✘ Locked","state.l.d":"The player doesn't have the required permission. The lore shows what permission or rank they need to unlock it.",
+    "prev.label":"Preview","prev.title":"The plugin in action","prev.sub":"Real screenshots of the plugin running on a Minecraft server.",
+    "prev.b0":"🔔 Notification","prev.b1":"✔ Available","prev.b2":"⏳ In Progress","prev.b3":"✘ Locked",
+    "prev.b4":"✏️ Editor","prev.b5":"📦 Items","prev.b6":"⌨ Commands","prev.b7":"⌚ Cooldown","prev.b8":"✎ Name","prev.b9":"⊘ Delete",
+    "prev.c0.t":"Join notification","prev.c0.d":"When joining the server, the player sees how many rewards are available to claim.",
+    "prev.c1.t":"State: Available","prev.c1.d":"The player has permission and the cooldown expired. Shows the full reward contents.",
+    "prev.c2.t":"State: In Progress","prev.c2.d":"The active cooldown is displayed in the lore with a real-time countdown.",
+    "prev.c3.t":"State: Locked","prev.c3.d":"Without the required permission, the player sees the reward as inaccessible.",
+    "prev.c4.t":"Reward Selector","prev.c4.d":"Lists all configured rewards. Click one to open its editor.",
+    "prev.c5.t":"Edit Items","prev.c5.d":"Drag items into the area to be delivered when the reward is claimed.",
+    "prev.c6.t":"Edit Commands","prev.c6.d":"Add, view and remove commands executed on claim. Click one to delete it.",
+    "prev.c7.t":"Edit Cooldown","prev.c7.d":"Choose from configurable presets or type a custom value in seconds.",
+    "prev.c8.t":"Edit Name","prev.c8.d":"Change the reward's display name in the menu with full HEX color support.",
+    "prev.c9.t":"Delete Reward","prev.c9.d":"Removes the reward from the configuration file. Requires Shift+Click to confirm.",
+    "cmd.label":"Commands","cmd.title":"Plugin commands","cmd.sub":"Player and admin commands with built-in tab completion.",
+    "cmd.tab1":"👤 Players","cmd.tab2":"🛡 Administration",
+    "cmd.th1":"Command","cmd.th2":"Description","cmd.th3":"Permission",
+    "cmd.p1":"Opens the daily rewards menu.","cmd.p2":"Alias for <code>/frewards</code>. Opens the same menu.","cmd.p3":"Spanish alias for <code>/frewards</code>.","cmd.p4":"Shows the help panel with all available subcommands.",
+    "cmd.a1":"Opens the reward selector in the GUI editor. Shows all configured rewards.","cmd.a2":"Directly opens the editor for a specific reward by its ID.","cmd.a3":"Reloads <code>rewardsgui.yml</code>, <code>messages.yml</code>, <code>editor.yml</code> and the active language.","cmd.a4":"Resets all cooldowns for a player so they can claim all rewards again.","cmd.a5":"Quick command to reload the plugin without extra arguments.","cmd.a6":"Quick command to reset a player's cooldowns.",
+    "cmd.tip.t":"Built-in tab completion","cmd.tip.d":"The plugin includes a <code>TabCompleter</code> that automatically suggests subcommands and reward IDs.",
+    "perm.label":"Permissions","perm.title":"Permission system","perm.sub":"Full control over who can do what, for players, admins and per reward rank.",
+    "perm.general":"— General permissions","perm.rewards":"— Per-reward permissions",
+    "perm.use":"Allows opening the rewards menu with /frewards, /rewards and /recompensas.",
+    "perm.editor":"Allows opening the GUI editor with /frewards editor.","perm.reload":"Allows reloading the plugin configuration.","perm.admin":"Allows resetting player cooldowns with /frewards reset.",
+    "perm.rid":"Each reward has its own permission based on its ID. Without it, the player sees the Locked state.","perm.examples":"Examples using server IDs. Assign these permissions to LuckPerms groups based on player rank.",
+    "perm.default.true":"default: all players","perm.default.op":"default: OP","perm.default.false":"default: false","perm.pergroup":"typically per group/rank",
+    "perm.tip.t":"LuckPerms integration","perm.tip.d":"Assign <code>frewards.user</code> to the <em>user</em> group, <code>frewards.ros</code> to the <em>ros</em> group, etc. The plugin detects the permission when opening the GUI.",
+    "ph.label":"Placeholders","ph.title":"Internal variables","ph.sub":"Use these placeholders inside the lore of each reward in <code>rewardsgui.yml</code>.",
+    "ph.p1":"Formatted remaining cooldown time for the reward with that ID. Updated each time the player opens the GUI.","ph.p2":"Colored name of the reward as defined in the <code>name</code> field of <code>rewardsgui.yml</code>.","ph.p3":"Name of the player claiming the reward. Available inside the <code>commands</code> field.","ph.p4":"Number of available rewards. Used in the join notification message.",
+    "cfg.label":"Configuration","cfg.title":"Configuration files","cfg.sub":"All customization is done through YAML files. The GUI editor writes directly to <code>rewardsgui.yml</code>.",
+    "cfg.rg.desc":"Defines the rewards, their states, lore, commands, cooldown and slot.","cfg.c.desc":"Prefix and global settings.","cfg.m.desc":"All system messages are configurable.","cfg.e.desc":"Customize editor GUIs: colors, materials, slots and cooldown presets.",
+    "cfg.data.t":"data.yml — auto-managed","cfg.data.d":"The plugin saves cooldown timestamps and physical items for each reward in <code>data.yml</code>. No manual editing needed.",
+    "how.label":"Installation","how.title":"Ready in 3 steps","how.sub":"Install and configure FRewards in under 5 minutes.",
+    "how.s1.t":"Drop the .jar in /plugins","how.s1.d":"Download <code>FRewards.jar</code> and copy it to your Paper 1.21+ server's <code>plugins/</code> folder. Restart to generate configuration files.",
+    "how.s2.t":"Configure rewardsgui.yml","how.s2.d":"Open <code>plugins/FRewards/rewardsgui.yml</code> and add rewards, or use the GUI editor with <code>/frewards editor</code>.",
+    "how.s3.t":"Assign permissions and reload","how.s3.d":"Assign <code>frewards.&lt;id&gt;</code> to LuckPerms groups. Run <code>/frewards reload</code> and players can use <code>/rewards</code>.",
+    "how.flow.label":"Game flow","how.flow.title":"How does it work?",
+    "how.fl1.t":"Join notification","how.fl1.d":"On login, the player receives an automatic message showing how many rewards are available to claim.",
+    "how.fl2.t":"Open /rewards","how.fl2.d":"The inventory shows all rewards with their current state based on the player's permissions.",
+    "how.fl3.t":"Claim and receive","how.fl3.d":"Clicking an available reward delivers items and runs the configured commands. A title and sound play on screen.",
+    "how.fl4.t":"Wait for the cooldown","how.fl4.d":"The reward switches to In Progress showing the remaining time. Cooldown persists across server restarts.",
+    "req.label":"Requirements","req.title":"Compatibility","req.sub":"FRewards requires Paper 1.21+ and Java 17. Everything else is optional.",
+    "req.r1":"Requires Java 17 or higher. Compatible with Java 21.","req.r2":"Designed for Paper API 1.21.4. Not compatible with Spigot.","req.r3":"Optional. Needed only to use placeholders in other plugins.","req.r4":"Recommended for managing per-rank permissions.",
+    "req.required":"REQUIRED","req.optional":"OPTIONAL",
+    "footer.brand":"Daily rewards plugin for Minecraft servers. Developed with ❤️ by TeamKraken.","footer.nav":"Navigation","footer.files":"Files","footer.perms":"Permissions","footer.made":"Made with 🧡 for the Minecraft community"
+  }
+};
+
+let lang = 'es';
+function applyLang(l) {
+  const d = T[l];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (d[k] !== undefined) el.innerHTML = d[k];
+  });
+  document.getElementById('langToggle').textContent = l === 'es' ? 'EN' : 'ES';
+  document.documentElement.lang = l;
+}
+function toggleLang() { lang = lang === 'es' ? 'en' : 'es'; applyLang(lang); }
+
+/* ── LIGHTBOX ── */
+function openLb(src, card) {
+  document.getElementById('lb-img').src = src;
+  const h4 = card.querySelector('h4');
+  document.getElementById('lb-cap').textContent = h4 ? h4.textContent : '';
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLb(e) {
+  if (e && e.target !== e.currentTarget && !e.target.classList.contains('lb-close')) return;
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
+
+/* ── STARS ── */
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+function initStars() {
+  stars = [];
+  const n = Math.floor((canvas.width * canvas.height) / 6000);
+  for (let i = 0; i < n; i++) stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*1.2+.2, o: Math.random()*.6+.1, s: Math.random()*.3+.05 });
+}
+function drawStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.o += s.s * .02; if (s.o > .8 || s.o < .05) s.s *= -1;
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(255,180,80,${s.o * .5})`; ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+window.addEventListener('resize', () => { resize(); initStars(); });
+resize(); initStars(); drawStars();
+
+/* ── TABS ── */
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── SCROLL REVEAL ── */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; }});
+}, { threshold: 0.08 });
+document.querySelectorAll('.feature-card,.ph-card,.req-card,.perm-card,.step,.state-card').forEach(el => {
+  el.style.opacity='0'; el.style.transform='translateY(24px)'; el.style.transition='opacity .5s ease,transform .5s ease';
+  obs.observe(el);
+});
+
+/* ── NAV ACTIVE ── */
+const sects = document.querySelectorAll('section[id]');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sects.forEach(s => { if (scrollY >= s.offsetTop - 100) cur = s.id; });
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.style.color = a.getAttribute('href') === '#'+cur ? 'var(--text)' : '';
+  });
+});
+</script>
+</body>
+</html>
