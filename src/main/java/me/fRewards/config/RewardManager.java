@@ -1,6 +1,7 @@
 package me.fRewards.config;
 
 import me.fRewards.main.Main;
+import me.fRewards.storage.ClaimStorage;
 import me.fRewards.utils.HexUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -11,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class RewardManager {
@@ -20,6 +20,7 @@ public class RewardManager {
     private final Map<String, Reward> rewards = new LinkedHashMap<>();
     private final File dataFile;
     private FileConfiguration dataConfig;
+    private final ClaimStorage claims;
 
     public RewardManager() {
         dataFile = new File(plugin.getDataFolder(), "data.yml");
@@ -31,8 +32,27 @@ public class RewardManager {
             }
         }
         dataConfig = YamlConfiguration.loadConfiguration(dataFile);
+
+        // Tiempos de reclamo en SQLite (data.yml queda solo para definiciones de ítems).
+        try {
+            this.claims = new ClaimStorage(plugin);
+            this.claims.migrateFromYaml(dataConfig, dataFile);
+            // Recargar dataConfig tras la posible limpieza de claves legacy.
+            dataConfig = YamlConfiguration.loadConfiguration(dataFile);
+        } catch (Exception e) {
+            plugin.getLogger().severe("════════════════════════════════════════════════════");
+            plugin.getLogger().severe("  FRewards: no se pudo inicializar el almacén SQLite.");
+            plugin.getLogger().severe("  El driver sqlite-jdbc lo descarga Paper (library loader)");
+            plugin.getLogger().severe("  en el primer arranque: requiere conexión a internet.");
+            plugin.getLogger().severe("  Detalle: " + e.getMessage());
+            plugin.getLogger().severe("════════════════════════════════════════════════════");
+            throw new RuntimeException("ClaimStorage init falló", e);
+        }
+
         loadRewards();
     }
+
+    public ClaimStorage getClaimStorage() { return claims; }
 
     private FileConfiguration cfg() {
         return plugin.getRewardsGuiConfig();
@@ -107,7 +127,7 @@ public class RewardManager {
     public boolean canClaim(Player player, String id) {
         Reward reward = getReward(id);
         if (reward == null) return false;
-        long lastClaim = dataConfig.getLong(player.getUniqueId() + "." + id.toLowerCase(), 0L);
+        long lastClaim = claims.getLastClaim(player.getUniqueId(), id);
         long now = System.currentTimeMillis() / 1000;
         if (reward.getCooldown() == -1) return lastClaim == 0;
         return (now - lastClaim) >= reward.getCooldown();
@@ -116,7 +136,7 @@ public class RewardManager {
     public long getRemainingTime(Player player, String id) {
         Reward reward = getReward(id);
         if (reward == null) return 0;
-        long lastClaim = dataConfig.getLong(player.getUniqueId() + "." + id.toLowerCase(), 0L);
+        long lastClaim = claims.getLastClaim(player.getUniqueId(), id);
         long now = System.currentTimeMillis() / 1000;
         if (reward.getCooldown() == -1) return lastClaim == 0 ? 0 : Long.MAX_VALUE;
         return Math.max(0, reward.getCooldown() - (now - lastClaim));
@@ -147,9 +167,8 @@ public class RewardManager {
             );
         }
 
-        // Registrar tiempo de reclamo
-        dataConfig.set(player.getUniqueId() + "." + id.toLowerCase(), System.currentTimeMillis() / 1000);
-        saveData();
+        // Registrar tiempo de reclamo (caché + persistencia async en SQLite)
+        claims.setClaim(player.getUniqueId(), id, System.currentTimeMillis() / 1000);
 
         // Entregar items
         giveItems(player, reward);
@@ -209,36 +228,14 @@ public class RewardManager {
     // ── Admin ────────────────────────────────────────────────────────────────
 
     public void resetRewardTime(OfflinePlayer player, String rewardId) {
-        dataConfig.set(player.getUniqueId() + "." + rewardId.toLowerCase(), null);
-        saveData();
+        claims.clearReward(player.getUniqueId(), rewardId);
     }
 
     public void resetAllRewards(OfflinePlayer player) {
-        dataConfig.set(player.getUniqueId().toString(), null);
-        saveData();
+        claims.clearAll(player.getUniqueId());
     }
 
     // ── Persistencia ─────────────────────────────────────────────────────────
-
-    private void saveData() {
-        // Serializar en el hilo principal (barato, captura un snapshot consistente)
-        // y escribir a disco de forma asíncrona para no bloquear el tick del servidor.
-        final String snapshot = dataConfig.saveToString();
-        Runnable write = () -> {
-            try {
-                java.nio.file.Files.writeString(dataFile.toPath(), snapshot,
-                    StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                plugin.getLogger().severe("❌ No se pudo guardar data.yml");
-            }
-        };
-        if (plugin.isEnabled()) {
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, write);
-        } else {
-            // Durante onDisable no se pueden programar tareas: escribir síncrono.
-            write.run();
-        }
-    }
 
     public void reload() {
         plugin.reloadConfig();

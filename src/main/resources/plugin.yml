@@ -11,6 +11,11 @@ description: |
 softdepend:
   - PlaceholderAPI
 
+# Paper descarga estas librerías en runtime y las añade al classpath del plugin
+# (no se incluyen en el jar). Driver SQLite para el almacén de reclamos.
+libraries:
+  - org.xerial:sqlite-jdbc:3.46.1.0
+
 commands:
   frewards:
     description: Abre el menú de recompensas y comandos relacionados.

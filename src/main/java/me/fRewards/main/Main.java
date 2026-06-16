@@ -198,6 +198,9 @@ public class Main extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         if (licenseManager != null) licenseManager.shutdown();
+        if (rewardManager != null && rewardManager.getClaimStorage() != null) {
+            rewardManager.getClaimStorage().close();
+        }
         RewardsGUI.cancelAll();
         getLogger().info("⛔ FRewards deshabilitado.");
     }

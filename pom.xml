@@ -90,6 +90,7 @@
                         <lib>${java.home}/jmods/java.base.jmod</lib>
                         <lib>${java.home}/jmods/java.logging.jmod</lib>
                         <lib>${java.home}/jmods/java.xml.jmod</lib>
+                        <lib>${java.home}/jmods/java.sql.jmod</lib>
                     </libs>
                 </configuration>
                 <dependencies>
